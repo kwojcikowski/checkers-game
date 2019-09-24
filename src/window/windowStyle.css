@@ -1,0 +1,19 @@
+#boardWrap{
+    -fx-background-color: #8B4513;
+}
+
+#whiteTile{
+    -fx-background-color: #FFFFFF;
+    -fx-min-width: 80;
+    -fx-min-height: 80;
+    -fx-max-width: 80;
+    -fx-max-height: 80;
+}
+
+#blackTile{
+    -fx-min-width: 80;
+    -fx-min-height: 80;
+    -fx-max-width: 80;
+    -fx-max-height: 80;
+    -fx-background-color: #8B4513;
+}
