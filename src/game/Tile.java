@@ -1,5 +1,7 @@
 package game;
 
+import pieces.Piece;
+
 public class Tile {
 
     private Piece occupant;
