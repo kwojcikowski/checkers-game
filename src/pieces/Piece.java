@@ -7,6 +7,7 @@ public class Piece{
     //Player owner;
     private Tile occupied;
 
+
     public void setOccupied(Tile occupied) {
         this.occupied = occupied;
     }
