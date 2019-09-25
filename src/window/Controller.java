@@ -26,14 +26,7 @@ public class Controller {
     //Method runs when window initialized
     @FXML
     public void initialize(){
-        //Generating labels for taken pieces
-        for(int i = 0; i < opponentTaken.getRowCount(); i++){
-            Label lab = new Label("oppTaken #"+i);
-            opponentTaken.add(lab, 0, i);
-            lab = new Label("playerTaken #"+i);
-            playerTaken.add(lab, 0, i);
-        }
-
+        //Generating board and assigning ids
         for(int i = 0; i < board.getRowCount(); i++){
             for (int j = 0; j < board.getColumnCount(); j++){
                 VBox box = new VBox();
@@ -70,6 +63,18 @@ public class Controller {
                     box.getChildren().add(pieceView);
                 }
             }
+        }
+
+        //Testing taken slots
+        for(int i = 0; i < playerTaken.getRowCount(); i++){
+            ImageView view = new ImageView();
+            Image img = new Image(getClass().getResource("/img/blackPiece.png").toExternalForm());
+            view.setImage(img);
+            playerTaken.add(view, 0, i);
+            view = new ImageView();
+            img = new Image(getClass().getResource("/img/whitePiece.png").toExternalForm());
+            view.setImage(img);
+            opponentTaken.add(view, 0, i);
         }
     }
 }

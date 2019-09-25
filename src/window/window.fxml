@@ -9,21 +9,27 @@
 
 <BorderPane id="container" fx:id="container" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" style="-fx-background-image: url('img/wood.png');" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="window.Controller">
    <bottom>
-      <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+      <HBox alignment="CENTER" BorderPane.alignment="CENTER">
          <children>
-            <Label text="Player" />
+            <Label text="Player">
+               <padding>
+                  <Insets bottom="10.0" />
+               </padding></Label>
          </children>
       </HBox>
    </bottom>
    <top>
-      <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+      <HBox alignment="CENTER" BorderPane.alignment="CENTER">
          <children>
             <Label text="Opponent" />
          </children>
+         <BorderPane.margin>
+            <Insets top="10.0" />
+         </BorderPane.margin>
       </HBox>
    </top>
    <left>
-      <GridPane fx:id="opponentTaken" BorderPane.alignment="CENTER">
+      <GridPane id="opponentTaken" fx:id="opponentTaken" BorderPane.alignment="CENTER">
         <columnConstraints>
           <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
         </columnConstraints>
@@ -44,7 +50,7 @@
       </GridPane>
    </left>
    <right>
-      <GridPane fx:id="playerTaken" BorderPane.alignment="CENTER">
+      <GridPane id="playerTaken" fx:id="playerTaken" BorderPane.alignment="CENTER_LEFT">
         <columnConstraints>
           <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
         </columnConstraints>
@@ -95,4 +101,7 @@
          </padding>
       </VBox>
    </center>
+   <padding>
+      <Insets left="40.0" right="40.0" />
+   </padding>
 </BorderPane>
