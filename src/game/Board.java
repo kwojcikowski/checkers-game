@@ -8,27 +8,34 @@ public class Board {
 
     public Board(){
         board = new Tile[8][8];
-        for(Tile[] a:board)
-            for(Tile t:a)
-                t=new Tile();
+        for(int i = 0; i < board.length; i++){
+            for(int j = 0; j < board[i].length; j++){
+                board[i][j] = new Tile();
+            }
+        }
     }
 
-    private void setBoard(){
+    protected void setBoard(){
 
-        for(int i=0;i<4;i++)
+        for(int i=0;i<3;i++)
             for(int j=0;j<8;j++)
-                if((j+i)%2==0) board[i][j].setOccupant(new Piece(true)); //for white
+                if((j+i)%2==0) {
+                    System.out.println(i + ","+j);
+                    board[i][j].setOccupant(new Piece(true)); //for white
+                    board[i][j].setOccupied(true);
+                }
 
-        for(int i=8;i>5;i--)
+        System.out.println();
+        for(int i=7;i>4;i--)
             for(int j=0;j<8;j++)
-                if((j+i)%2==0) board[i][j].setOccupant(new Piece(false)); //for black
+                if((j+i)%2==0) {
+                    System.out.println(i + ","+j);
+                    board[i][j].setOccupant(new Piece(false)); //for black
+                    board[i][j].setOccupied(true);
+                }
     }
 
-    public void startGame(){
-        setBoard();
-
-    }
-    public static void main(String[] args){
-        new Board();
+    public Tile[][] getBoard() {
+        return board;
     }
 }

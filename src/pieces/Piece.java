@@ -1,7 +1,6 @@
 package pieces;
 import game.Tile;
 public class Piece{
-
     //Player owner;
     private boolean isWhite;
     private Tile occupied;
@@ -18,4 +17,7 @@ public class Piece{
         return occupied;
     }
 
+    public boolean isWhite() {
+        return isWhite;
+    }
 }

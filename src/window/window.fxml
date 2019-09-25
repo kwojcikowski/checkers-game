@@ -7,7 +7,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane id="container" fx:id="container" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" style="-fx-background-image: url('img/wood.png');" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="window.Controller">
+<BorderPane id="container" fx:id="container" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" style="-fx-background-image: url('img/wood.png');" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="game.Controller">
    <bottom>
       <HBox alignment="CENTER" BorderPane.alignment="CENTER">
          <children>
@@ -73,7 +73,7 @@
    <center>
       <VBox id="boardWrap" alignment="CENTER" maxHeight="520.0" maxWidth="520.0" minHeight="520.0" minWidth="520.0" prefHeight="520.0" prefWidth="520.0" BorderPane.alignment="CENTER">
          <children>
-            <GridPane id="board" fx:id="board" alignment="CENTER" VBox.vgrow="NEVER">
+            <GridPane id="board" fx:id="boardGrid" alignment="CENTER" VBox.vgrow="NEVER">
               <columnConstraints>
                   <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                   <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />

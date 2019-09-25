@@ -15,5 +15,11 @@ public class Tile {
         return occupant;
     }
 
+    public boolean isOccupied() {
+        return isOccupied;
+    }
 
+    public void setOccupied(boolean occupied) {
+        isOccupied = occupied;
+    }
 }
