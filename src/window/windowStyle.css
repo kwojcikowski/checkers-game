@@ -1,19 +1,24 @@
+.root{
+    -fx-background-repeat: stretch;
+}
+
 #boardWrap{
-    -fx-background-color: #8B4513;
+    -fx-background-color: #FBEFE1;
+    -fx-border-width: 2;
+    -fx-border-color: #8B4513;
 }
 
 #whiteTile{
-    -fx-background-color: #FFFFFF;
-    -fx-min-width: 80;
-    -fx-min-height: 80;
-    -fx-max-width: 80;
-    -fx-max-height: 80;
+    -fx-background-color: #FBEFE1;
+}
+
+#board{
+    -fx-border-color: #8B4513;
+    -fx-border-width: 2;
+    -fx-min-width: 500;
+    -fx-min-height: 500;
 }
 
 #blackTile{
-    -fx-min-width: 80;
-    -fx-min-height: 80;
-    -fx-max-width: 80;
-    -fx-max-height: 80;
     -fx-background-color: #8B4513;
 }

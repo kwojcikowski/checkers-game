@@ -12,10 +12,10 @@ public class Window extends Application {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("window.fxml"));
         Parent root = loader.load();
         stage.setTitle("Chess Game");
-        Scene scene = new Scene(root, 1280, 800);
+        Scene scene = new Scene(root, 800, 600);
         scene.getStylesheets().add(getClass().getResource("windowStyle.css").toExternalForm());
         stage.setScene(scene);
-        stage.sizeToScene();
+        stage.setResizable(false);
         stage.show();
     }
 
