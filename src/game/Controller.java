@@ -73,6 +73,9 @@ public class Controller {
             }
         }
 
+
+        game.moveChecker(4,2);
+
         /*
         //Testing taken slots
         for(int i = 0; i < playerTaken.getRowCount(); i++){
@@ -85,5 +88,6 @@ public class Controller {
             view.setImage(img);
             opponentTaken.add(view, 0, i);
         }*/
+
     }
 }
