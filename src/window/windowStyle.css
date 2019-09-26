@@ -31,10 +31,6 @@
 #blackTile{
     -fx-background-color: #8B4513;
 }
-
-#travellingPiece{
-    -fx-background-color: rgba(0,0,0,0);
-}
 #available{
-    -fx-background-color: #0044ff;
+    -fx-background-color: rgba(0, 170, 220, 1);
 }

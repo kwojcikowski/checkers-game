@@ -20,7 +20,6 @@ public class Board {
         for(int i=0;i<3;i++)
             for(int j=0;j<8;j++)
                 if((j+i)%2==0) {
-                    System.out.println(i + ","+j);
                     board[i][j].setOccupant(new Piece(true)); //for white
                     board[i][j].setOccupied(true);
                 }
@@ -29,7 +28,6 @@ public class Board {
         for(int i=7;i>4;i--)
             for(int j=0;j<8;j++)
                 if((j+i)%2==0) {
-                    System.out.println(i + ","+j);
                     board[i][j].setOccupant(new Piece(false)); //for black
                     board[i][j].setOccupied(true);
                 }
