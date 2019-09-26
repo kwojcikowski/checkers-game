@@ -71,7 +71,7 @@
       </GridPane>
    </right>
    <center>
-      <VBox id="boardWrap" alignment="CENTER" maxHeight="520.0" maxWidth="520.0" minHeight="520.0" minWidth="520.0" prefHeight="520.0" prefWidth="520.0" BorderPane.alignment="CENTER">
+      <VBox id="boardWrap"  fx:id="boardWrap" alignment="CENTER" maxHeight="520.0" maxWidth="520.0" minHeight="520.0" minWidth="520.0" prefHeight="520.0" prefWidth="520.0" BorderPane.alignment="CENTER">
          <children>
             <GridPane id="board" fx:id="boardGrid" alignment="CENTER" VBox.vgrow="NEVER">
               <columnConstraints>
