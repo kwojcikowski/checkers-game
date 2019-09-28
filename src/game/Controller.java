@@ -96,13 +96,9 @@ public class Controller {
 
     public void handlePieceClick(int row, int col){
         LinkedList<Move> fields = game.moveChecker(row, col);
-        System.out.println("linked list size : "+ fields.size());
-        for(Move m:fields){
-            System.out.println(m.getX() +","+m.getY());
-        }
         setupFields(fields, row, col);
     }
-    public void movePiece(int currentRow, int currentCol, int targetRow, int targetCol){
+    public void movePiece(int currentRow, int currentCol, int targetRow, int targetCol, boolean isAttacking){
 
         //Detaching piece Object so it can move
         ImageView movingPiece = piecesImages[currentRow][currentCol];
@@ -173,8 +169,9 @@ public class Controller {
         for(Move m : fields){
             int row = m.getX();
             int col = m.getY();
+            boolean isAttacking = m.isAttacking();
             boardLayout[row][col].setOnMouseClicked(mouseEvent -> {
-                movePiece(currentRow, currentCol, row, col);
+                movePiece(currentRow, currentCol, row, col, isAttacking);
             });
             boardLayout[row][col].setId("available");
         }
