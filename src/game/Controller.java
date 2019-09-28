@@ -5,7 +5,6 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
-import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
@@ -28,6 +27,9 @@ public class Controller {
     private Image blackPieceImg;
     private Game game;
 
+    private int numberOfWhiteTaken = 0;
+    private int numberOfBlackTaken = 0;
+
     //General layout
     private VBox[][] boardLayout = new VBox[8][8];
 
@@ -42,7 +44,7 @@ public class Controller {
         //Generate backend
         game = new Game();
         game.startGame();
-        board = game.getBoard().getBoard();
+        board = game.getBoard().getTiles();
 
         //Generating board and assigning ids
         for(int i = 0; i < boardGrid.getRowCount(); i++){
@@ -91,15 +93,17 @@ public class Controller {
         ImageView v = new ImageView(blackPieceImg);
         testBox.getChildren().add(v);
         board[3][5].setOccupant(new Piece(false));
-        System.out.println(board[3][5].isOccupied());
+        piecesImages[3][5] = v;
+        board[6][6].setOccupied(false);
+        boardLayout[6][6].getChildren().clear();
+        piecesImages[6][6] = null;
     }
 
     public void handlePieceClick(int row, int col){
-        LinkedList<Move> fields = game.moveChecker(row, col);
+        LinkedList<Move> fields = game.moveChecker(row, col, board);
         setupFields(fields, row, col);
     }
     public void movePiece(int currentRow, int currentCol, int targetRow, int targetCol, boolean isAttacking){
-
         //Detaching piece Object so it can move
         ImageView movingPiece = piecesImages[currentRow][currentCol];
         VBox startingContainer =  boardLayout[currentRow][currentCol];
@@ -134,6 +138,11 @@ public class Controller {
             @Override
             public void handle(ActionEvent event) {
                 attachImage(currentRow, currentCol, targetRow, targetCol);
+                if (isAttacking) {
+                    int attackedRow = currentRow + (targetRow - currentRow)/2;
+                    int attackedCol = currentCol + (targetCol - currentCol)/2;
+                    handleAttackedPiece(attackedRow, attackedCol);
+                }
             }
         });
         transition.play();
@@ -185,11 +194,25 @@ public class Controller {
                 VBox box = boardLayout[i][j];
                 if(box.getId().equalsIgnoreCase("available")){
                     box.setId("blackTile");
-                    int finalI = i;
-                    int finalJ = j;
-                    box.setOnMouseClicked(mouseEvent -> handlePieceClick(finalI, finalJ));
+                    box.setOnMouseClicked(mouseEvent -> {});
                 }
             }
         }
+    }
+
+    public void handleAttackedPiece(int row, int col){
+        ImageView takenPieceImg = piecesImages[row][col];
+        VBox takenSpot = boardLayout[row][col];
+        Piece takenPiece = board[row][col].getOccupant();
+        if(takenPiece.isWhite()){
+            playerTaken.add(takenPieceImg, 0,numberOfWhiteTaken);
+            numberOfWhiteTaken++;
+        }else{
+            opponentTaken.add(takenPieceImg, 0, numberOfBlackTaken);
+            numberOfBlackTaken++;
+        }
+        board[row][col].setOccupied(false);
+        takenSpot.getChildren().clear();
+        piecesImages[row][col] = null;
     }
 }

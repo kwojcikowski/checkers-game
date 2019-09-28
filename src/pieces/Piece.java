@@ -9,6 +9,11 @@ public class Piece{
         this.isWhite=isWhite;
     }
 
+    public Piece(Piece piece){
+        this.isWhite = piece.isWhite();
+        this.occupied = piece.occupied;
+    }
+
     public void setOccupied(Tile occupied) {
         this.occupied = occupied;
     }
