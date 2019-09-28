@@ -24,10 +24,13 @@
 #board{
     -fx-border-color: #8B4513;
     -fx-border-width: 2;
-    -fx-min-width: 500;
-    -fx-min-height: 500;
+    -fx-min-width: 504;
+    -fx-min-height: 504;
 }
 
 #blackTile{
     -fx-background-color: #8B4513;
+}
+#available{
+    -fx-background-color: rgba(0, 170, 220, 1);
 }
