@@ -13,6 +13,8 @@ import javafx.scene.shape.Line;
 import javafx.util.Duration;
 import pieces.Piece;
 
+import java.util.LinkedList;
+
 public class Controller {
 
     @FXML private BorderPane container;
@@ -24,6 +26,7 @@ public class Controller {
     private ImageView[][] piecesImages = new ImageView[8][8];
     private Image whitePieceImg;
     private Image blackPieceImg;
+    private Game game;
 
     //General layout
     private VBox[][] boardLayout = new VBox[8][8];
@@ -37,7 +40,7 @@ public class Controller {
         blackPieceImg = new Image(getClass().getResource("/img/blackPiece.png").toExternalForm());
 
         //Generate backend
-        Game game = new Game();
+        game = new Game();
         game.startGame();
         board = game.getBoard().getBoard();
 
@@ -71,10 +74,7 @@ public class Controller {
                         boardLayout[i][j].getChildren().add(view);
                         int finalI = i;
                         int finalJ = j;
-                        view.setOnMouseClicked(mouseEvent -> {
-                            setupFields(finalI, finalJ);
-                            game.moveChecker(4,2);
-                        });
+                        view.setOnMouseClicked(mouseEvent -> handlePieceClick(finalI, finalJ));
                     } else {
                         boardLayout[i][j].getChildren().clear();
                         ImageView view = new ImageView(blackPieceImg);
@@ -85,8 +85,23 @@ public class Controller {
                 }
             }
         }
+
+        //Testing moves
+        VBox testBox = boardLayout[3][5];
+        ImageView v = new ImageView(blackPieceImg);
+        testBox.getChildren().add(v);
+        board[3][5].setOccupant(new Piece(false));
+        System.out.println(board[3][5].isOccupied());
     }
 
+    public void handlePieceClick(int row, int col){
+        LinkedList<Move> fields = game.moveChecker(row, col);
+        System.out.println("linked list size : "+ fields.size());
+        for(Move m:fields){
+            System.out.println(m.getX() +","+m.getY());
+        }
+        setupFields(fields, row, col);
+    }
     public void movePiece(int currentRow, int currentCol, int targetRow, int targetCol){
 
         //Detaching piece Object so it can move
@@ -140,29 +155,28 @@ public class Controller {
         piecesImages[oldRow][oldCol] = null;
         //Move in Image array
         piecesImages[row][col] = new ImageView(img);
-        piecesImages[row][col].setOnMouseClicked(mouseEvent -> {
-            setupFields(row, col);
-        });
+        piecesImages[row][col].setOnMouseClicked(mouseEvent -> handlePieceClick(row, col));
         //Add to board
         boardLayout[row][col].getChildren().clear();
         boardLayout[row][col].getChildren().add(piecesImages[row][col]);
+        //Update backend borad
+        board[row][col].setOccupant(board[oldRow][oldCol].getOccupant());
+        board[oldRow][oldCol].setOccupied(false);
+        board[row][col].setOccupied(true);
+
         updateOnMouse();
     }
 
-    public void setupFields(int i, int j){
+    public void setupFields(LinkedList<Move> fields, int currentRow, int currentCol){
         updateOnMouse();
         //Change background of available field and set onClickEvent
-        if(i+1 < 8 && j+1 <8){
-            boardLayout[i+1][j+1].setOnMouseClicked(mouseEvent -> {
-                movePiece(i, j, i+1, j+1);
+        for(Move m : fields){
+            int row = m.getX();
+            int col = m.getY();
+            boardLayout[row][col].setOnMouseClicked(mouseEvent -> {
+                movePiece(currentRow, currentCol, row, col);
             });
-            boardLayout[i+1][j+1].setId("available");
-        }
-        if(i+1 < 8 && j-1 > -1){
-            boardLayout[i+1][j-1].setOnMouseClicked(mouseEvent -> {
-                movePiece(i, j, i+1, j-1);
-            });
-            boardLayout[i+1][j-1].setId("available");
+            boardLayout[row][col].setId("available");
         }
     }
 
@@ -176,7 +190,7 @@ public class Controller {
                     box.setId("blackTile");
                     int finalI = i;
                     int finalJ = j;
-                    box.setOnMouseClicked(mouseEvent -> setupFields(finalI, finalJ));
+                    box.setOnMouseClicked(mouseEvent -> handlePieceClick(finalI, finalJ));
                 }
             }
         }
