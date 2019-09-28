@@ -2,7 +2,6 @@ package game;
 
 import pieces.Piece;
 
-import java.util.Arrays;
 import java.util.LinkedList;
 
 public class Game {
@@ -14,11 +13,21 @@ public class Game {
        board.setBoard();
     }
 
+    void whiteTurn(){
+
+    }
+
+    void blackTurn(){
+        AI black=new AI();
+        //black.findBestMove(moveChecker(,,board.getTiles(),true));
+    }
+
     public Board getBoard(){
         return board;
     }
 
-    public LinkedList<Move> moveChecker(final int x, final int y, final Tile[][] tiles, final boolean availableNow){
+    public LinkedList<Move> moveChecker(final int x, final int y, final Tile[][] tiles,
+                                        final boolean availableNow){
         LinkedList<Move> moves=new LinkedList<>();
         final boolean isWhite=tiles[x][y].getOccupant().isWhite();
         final int j;

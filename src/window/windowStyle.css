@@ -32,11 +32,11 @@
     -fx-background-color: #8B4513;
 }
 #available{
-    -fx-background-color: rgba(0, 170, 220, 1);
+    -fx-background-color: rgba(12, 178, 241, 0.78);
 }
 
 #notDirectlyAvailable{
-    //somechanges
+    //some changes
     -fx-background-color: rgba(0, 170, 220, 1);
 
 }
