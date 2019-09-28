@@ -18,31 +18,32 @@ public class Game {
         return board;
     }
 
-    public LinkedList<Move> moveChecker(int x, int y, final Tile[][] tiles){
+    public LinkedList<Move> moveChecker(final int x, final int y, final Tile[][] tiles, final boolean availableNow){
         LinkedList<Move> moves=new LinkedList<>();
-        boolean isWhite = false;
-        try {
-            isWhite = tiles[x][y].getOccupant().isWhite();
-        }catch (NullPointerException e){}
+        final boolean isWhite=tiles[x][y].getOccupant().isWhite();
         final int j;
         if(isWhite) j=1;
         else j=-1;
+
         for(int i=-1;i<3;i+=2){
             try{
-                if(!tiles[x+j][y+i].isOccupied()){
-                    moves.add(new Move(x+j,y+i,false));
+                if(!tiles[x+j][y+i].isOccupied()&&availableNow){
+                    moves.add(new Move(x+j,y+i,false,true));
                 }
-                else if(tiles[x+j][y+i].isOccupied()&&isWhite!=tiles[x+j][y+i].getOccupant().isWhite()){
-                    if(!tiles[x+j*2][y+2*i].isOccupied()){
-                        moves.add(new Move(x+j*2,y+2*i,true));
-                        Tile[][] alternative = copyBoard(tiles);
-                        alternative[x+j][y+i].setOccupied(false);
-                        alternative[x+j*2][y+i*2].setOccupant(alternative[x][y].getOccupant());
-                        alternative[x][y].setOccupied(false);
-                        moves.addAll(moveChecker(x+j*2,y+2*i,alternative));
+                for(int k=-1;k<3;k+=2){
+                    if(tiles[x+j*k][y+i].isOccupied()&&isWhite!=tiles[x+j*k][y+i].getOccupant().isWhite()){
+                        if(!tiles[x+j*2*k][y+2*i].isOccupied()){
+                            moves.add(new Move(x+j*2*k,y+2*i,true,availableNow));
+                            final Tile[][] alternative = copyBoard(tiles);
+                            alternative[x+j*k][y+i].setOccupied(false);
+                            alternative[x+j*2*k][y+i*2].setOccupant(alternative[x][y].getOccupant());
+                            alternative[x][y].setOccupied(false);
+                            moves.addAll(moveChecker(x+j*2*k,y+2*i,alternative,false));
+                        }
                     }
                 }
-            }catch(ArrayIndexOutOfBoundsException ignored){};
+
+            }catch(ArrayIndexOutOfBoundsException ignore){}
         }
 
         return moves;

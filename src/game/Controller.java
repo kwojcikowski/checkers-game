@@ -100,7 +100,7 @@ public class Controller {
     }
 
     public void handlePieceClick(int row, int col){
-        LinkedList<Move> fields = game.moveChecker(row, col, board);
+        LinkedList<Move> fields = game.moveChecker(row, col, board, true);
         setupFields(fields, row, col);
     }
     public void movePiece(int currentRow, int currentCol, int targetRow, int targetCol, boolean isAttacking){
@@ -179,10 +179,16 @@ public class Controller {
             int row = m.getX();
             int col = m.getY();
             boolean isAttacking = m.isAttacking();
-            boardLayout[row][col].setOnMouseClicked(mouseEvent -> {
-                movePiece(currentRow, currentCol, row, col, isAttacking);
-            });
-            boardLayout[row][col].setId("available");
+            if(m.isAvailableNow()){
+                boardLayout[row][col].setOnMouseClicked(mouseEvent -> {
+                    movePiece(currentRow, currentCol, row, col, isAttacking);
+                });
+                boardLayout[row][col].setId("available");
+            }
+            else boardLayout[row][col].setId("notDirectlyAvailable");
+
+            if(isAttacking) boardLayout[row][col].setId("isAttacking");
+
         }
     }
 
@@ -192,7 +198,9 @@ public class Controller {
         for(int i = 0; i < boardLayout.length; i++) {
             for (int j = 0; j < boardLayout[i].length; j++) {
                 VBox box = boardLayout[i][j];
-                if(box.getId().equalsIgnoreCase("available")){
+                if(box.getId().equalsIgnoreCase("available")||
+                        box.getId().equalsIgnoreCase("notDirectlyAvailable")||
+                        box.getId().equalsIgnoreCase("isAttacking")){
                     box.setId("blackTile");
                     box.setOnMouseClicked(mouseEvent -> {});
                 }
