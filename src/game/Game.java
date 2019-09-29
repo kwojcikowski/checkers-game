@@ -6,20 +6,32 @@ import java.util.LinkedList;
 
 public class Game {
 
+    private Controller controller;
     private Board board;
+    private boolean whiteTurn;
 
-    public void startGame(){
-       board = new Board();
-       board.setBoard();
+    public void startGame(Controller controller){
+        this.controller = controller;
+        board = new Board();
+        board.setBoard();
     }
 
     void whiteTurn(){
-
+        whiteTurn = true;
+        controller.disableBlackPieces();
+        controller.enableWhitePieces();
     }
 
     void blackTurn(){
+        whiteTurn = false;
+        controller.disableWhitePieces();
+        /*
         AI black=new AI();
-        //black.findBestMove(moveChecker(,,board.getTiles(),true));
+        //black.findBestMove(moveChecker(,,board.getTiles(),true));*/
+    }
+
+    public boolean isWhiteTurn(){
+        return whiteTurn;
     }
 
     public Board getBoard(){
@@ -27,7 +39,7 @@ public class Game {
     }
 
     public LinkedList<Move> moveChecker(final int x, final int y, final Tile[][] tiles,
-                                        final boolean availableNow){
+                                        final boolean availableNow, final boolean recursive){
         LinkedList<Move> moves=new LinkedList<>();
         final boolean isWhite=tiles[x][y].getOccupant().isWhite();
         final int j;
@@ -37,17 +49,21 @@ public class Game {
         for(int i=-1;i<3;i+=2){
             try{
                 if(!tiles[x+j][y+i].isOccupied()&&availableNow){
-                    moves.add(new Move(x+j,y+i,false,true));
+                    moves.add(new Move(x+j,y+i,false,true, false));
                 }
+            }catch(ArrayIndexOutOfBoundsException ignore){}
+            try {
                 for(int k=-1;k<3;k+=2){
                     if(tiles[x+j*k][y+i].isOccupied()&&isWhite!=tiles[x+j*k][y+i].getOccupant().isWhite()){
                         if(!tiles[x+j*2*k][y+2*i].isOccupied()){
-                            moves.add(new Move(x+j*2*k,y+2*i,true,availableNow));
-                            final Tile[][] alternative = copyBoard(tiles);
-                            alternative[x+j*k][y+i].setOccupied(false);
-                            alternative[x+j*2*k][y+i*2].setOccupant(alternative[x][y].getOccupant());
-                            alternative[x][y].setOccupied(false);
-                            moves.addAll(moveChecker(x+j*2*k,y+2*i,alternative,false));
+                            moves.add(new Move(x+j*2*k,y+2*i,true,availableNow, !availableNow));
+                            if(recursive) {
+                                final Tile[][] alternative = copyBoard(tiles);
+                                alternative[x + j * k][y + i].setOccupied(false);
+                                alternative[x + j * 2 * k][y + i * 2].setOccupant(alternative[x][y].getOccupant());
+                                alternative[x][y].setOccupied(false);
+                                moves.addAll(moveChecker(x + j * 2 * k, y + 2 * i, alternative, false, true));
+                            }
                         }
                     }
                 }
@@ -72,5 +88,4 @@ public class Game {
         }
         return copy;
     }
-
 }

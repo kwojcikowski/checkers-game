@@ -1,6 +1,7 @@
 package game;
 
 import javafx.animation.PathTransition;
+import javafx.animation.Transition;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -26,6 +27,8 @@ public class Controller {
     private Image whitePieceImg;
     private Image blackPieceImg;
     private Game game;
+    private AI ai;
+    private PathTransition pieceMove;
 
     private int numberOfWhiteTaken = 0;
     private int numberOfBlackTaken = 0;
@@ -43,8 +46,11 @@ public class Controller {
 
         //Generate backend
         game = new Game();
-        game.startGame();
+        game.startGame(this);
         board = game.getBoard().getTiles();
+
+        //Generate AI
+        ai = new AI(this, game);
 
         //Generating board and assigning ids
         for(int i = 0; i < boardGrid.getRowCount(); i++){
@@ -85,10 +91,11 @@ public class Controller {
             }
         }
         enableWhitePieces();
+        game.whiteTurn();
     }
 
     public void handlePieceClick(int row, int col){
-        LinkedList<Move> fields = game.moveChecker(row, col, board, true);
+        LinkedList<Move> fields = game.moveChecker(row, col, board, true, true);
         setupFields(fields, row, col);
     }
 
@@ -120,6 +127,7 @@ public class Controller {
         //Transition effect
         Line line = new Line(x, y, endX, endY);
         PathTransition transition = new PathTransition();
+        pieceMove = transition;
         transition.setNode(movingPiece);
         transition.setDuration(Duration.seconds(0.3));
         transition.setPath(line);
@@ -127,18 +135,21 @@ public class Controller {
             @Override
             public void handle(ActionEvent event) {
                 attachImage(currentRow, currentCol, targetRow, targetCol);
+                boolean maintainTurn = false;
                 if (isAttacking) {
                     int attackedRow = currentRow + (targetRow - currentRow)/2;
                     int attackedCol = currentCol + (targetCol - currentCol)/2;
                     handleAttackedPiece(attackedRow, attackedCol);
-                    checkForFurtherMoves(targetRow, targetCol);
+                    maintainTurn = checkForFurtherMoves(targetRow, targetCol);
                 }
-                if(movingPiece.getImage().getUrl().contains("white")){
-                    disableWhitePieces();
-                    enableBlackPieces();
-                }else{
-                    disableBlackPieces();
-                    enableWhitePieces();
+                transition.stop();
+                System.out.println(transition.getStatus());
+                //Change of turn
+                if(!maintainTurn){
+                    if(game.isWhiteTurn()){
+                        game.blackTurn();
+                        ai.playAITurn();
+                    }
                 }
             }
         });
@@ -161,7 +172,7 @@ public class Controller {
         //Add to board
         boardLayout[row][col].getChildren().clear();
         boardLayout[row][col].getChildren().add(piecesImages[row][col]);
-        //Update backend borad
+        //Update backend board
         board[row][col].setOccupant(board[oldRow][oldCol].getOccupant());
         board[oldRow][oldCol].setOccupied(false);
         board[row][col].setOccupied(true);
@@ -221,20 +232,21 @@ public class Controller {
         piecesImages[row][col] = null;
     }
 
-    public void checkForFurtherMoves(int row, int col){
-        LinkedList<Move> moves = game.moveChecker(row, col, board, true);
+    public boolean checkForFurtherMoves(int row, int col){
+        LinkedList<Move> moves = game.moveChecker(row, col, board, true, false);
         LinkedList<Move> availableMoves = new LinkedList<>();
         if(moves.size() == 0)
-            return;
+            return false;
         for(Move m : moves){
             if(m.isAttacking()){
                 availableMoves.add(m);
             }
         }
         if(availableMoves.size() == 0)
-            return;
+            return false;
         setupFields(availableMoves, row, col);
         disableAllPieces();
+        return true;
     }
 
     public void disableWhitePieces(){
@@ -296,5 +308,21 @@ public class Controller {
     public void disableAllPieces(){
         disableBlackPieces();
         disableWhitePieces();
+    }
+
+    public VBox getBoardWrap() {
+        return boardWrap;
+    }
+
+    public ImageView[][] getPiecesImages() {
+        return piecesImages;
+    }
+
+    public VBox[][] getBoardLayout() {
+        return boardLayout;
+    }
+
+    public BorderPane getContainer() {
+        return container;
     }
 }
