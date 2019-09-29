@@ -74,9 +74,6 @@ public class Controller {
                         ImageView view = new ImageView(whitePieceImg);
                         piecesImages[i][j] = view;
                         boardLayout[i][j].getChildren().add(view);
-                        int finalI = i;
-                        int finalJ = j;
-                        view.setOnMouseClicked(mouseEvent -> handlePieceClick(finalI, finalJ));
                     } else {
                         boardLayout[i][j].getChildren().clear();
                         ImageView view = new ImageView(blackPieceImg);
@@ -87,22 +84,14 @@ public class Controller {
                 }
             }
         }
-
-        //Testing moves
-        VBox testBox = boardLayout[3][5];
-        ImageView v = new ImageView(blackPieceImg);
-        testBox.getChildren().add(v);
-        board[3][5].setOccupant(new Piece(false));
-        piecesImages[3][5] = v;
-        board[6][6].setOccupied(false);
-        boardLayout[6][6].getChildren().clear();
-        piecesImages[6][6] = null;
+        enableWhitePieces();
     }
 
     public void handlePieceClick(int row, int col){
         LinkedList<Move> fields = game.moveChecker(row, col, board, true);
         setupFields(fields, row, col);
     }
+
     public void movePiece(int currentRow, int currentCol, int targetRow, int targetCol, boolean isAttacking){
         //Detaching piece Object so it can move
         ImageView movingPiece = piecesImages[currentRow][currentCol];
@@ -142,6 +131,14 @@ public class Controller {
                     int attackedRow = currentRow + (targetRow - currentRow)/2;
                     int attackedCol = currentCol + (targetCol - currentCol)/2;
                     handleAttackedPiece(attackedRow, attackedCol);
+                    checkForFurtherMoves(targetRow, targetCol);
+                }
+                if(movingPiece.getImage().getUrl().contains("white")){
+                    disableWhitePieces();
+                    enableBlackPieces();
+                }else{
+                    disableBlackPieces();
+                    enableWhitePieces();
                 }
             }
         });
@@ -222,5 +219,82 @@ public class Controller {
         board[row][col].setOccupied(false);
         takenSpot.getChildren().clear();
         piecesImages[row][col] = null;
+    }
+
+    public void checkForFurtherMoves(int row, int col){
+        LinkedList<Move> moves = game.moveChecker(row, col, board, true);
+        LinkedList<Move> availableMoves = new LinkedList<>();
+        if(moves.size() == 0)
+            return;
+        for(Move m : moves){
+            if(m.isAttacking()){
+                availableMoves.add(m);
+            }
+        }
+        if(availableMoves.size() == 0)
+            return;
+        setupFields(availableMoves, row, col);
+        disableAllPieces();
+    }
+
+    public void disableWhitePieces(){
+        for(ImageView[] row : piecesImages){
+            for(ImageView v : row){
+                if(v != null) {
+                    if(v.getImage().getUrl().contains("white")) {
+                        v.setOnMouseClicked(mouseEvent -> {
+                        });
+                    }
+                }
+            }
+        }
+    }
+
+    public void disableBlackPieces(){
+        for(ImageView[] row : piecesImages){
+            for(ImageView v : row){
+                if(v != null) {
+                    if(v.getImage().getUrl().contains("black")) {
+                        v.setOnMouseClicked(mouseEvent -> {
+                        });
+                    }
+                }
+            }
+        }
+    }
+
+    public void enableWhitePieces(){
+        for(int i = 0; i < piecesImages.length; i++){
+            for(int j = 0; j < piecesImages[i].length; j++){
+                ImageView v = piecesImages[i][j];
+                if(v != null) {
+                    int row = i;
+                    int col = j;
+                    if(v.getImage().getUrl().contains("white")) {
+                        v.setOnMouseClicked(mouseEvent -> handlePieceClick(row, col));
+                    }
+                }
+            }
+        }
+    }
+
+    public void enableBlackPieces(){
+        for(int i = 0; i < piecesImages.length; i++){
+            for(int j = 0; j < piecesImages[i].length; j++){
+                ImageView v = piecesImages[i][j];
+                if(v != null) {
+                    int row = i;
+                    int col = j;
+                    if(v.getImage().getUrl().contains("black")) {
+                        v.setOnMouseClicked(mouseEvent -> handlePieceClick(row, col));
+                    }
+                }
+            }
+        }
+    }
+
+    public void disableAllPieces(){
+        disableBlackPieces();
+        disableWhitePieces();
     }
 }
