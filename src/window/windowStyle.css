@@ -35,12 +35,6 @@
     -fx-background-color: rgba(0, 170, 220, 1);
 }
 
-#notDirectlyAvailable{
-    //somechanges
-    -fx-background-color: rgba(0, 170, 220, 1);
-
-}
-
 #isAttacking {
     -fx-background-color: rgba(248, 0, 27, 0.54);
 }

@@ -2,10 +2,17 @@ package game;
 
 import pieces.Piece;
 
+import java.util.Stack;
+
 public class Tile {
 
     private Piece occupant;
     private boolean isOccupied;
+    private Stack<Piece> history;
+
+    public void updateHistory(Piece piece){
+        history.push(piece);
+    }
 
     public void setOccupant(Piece occupant) {
         this.occupant = occupant;
@@ -29,4 +36,6 @@ public class Tile {
         }
         //end
     }
+
+
 }

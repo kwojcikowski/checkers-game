@@ -182,8 +182,6 @@ public class Controller {
                 });
                 boardLayout[row][col].setId("available");
             }
-            else boardLayout[row][col].setId("notDirectlyAvailable");
-
             if(isAttacking) boardLayout[row][col].setId("isAttacking");
 
         }

@@ -18,7 +18,8 @@ public class Game {
         return board;
     }
 
-    public LinkedList<Move> moveChecker(final int x, final int y, final Tile[][] tiles, final boolean availableNow){
+    public LinkedList<Move> moveChecker(final int x, final int y, final Tile[][] tiles,
+                                        final boolean availableNow){
         LinkedList<Move> moves=new LinkedList<>();
         final boolean isWhite=tiles[x][y].getOccupant().isWhite();
         final int j;
@@ -30,9 +31,15 @@ public class Game {
                 if(!tiles[x+j][y+i].isOccupied()&&availableNow){
                     moves.add(new Move(x+j,y+i,false,true));
                 }
-                for(int k=-1;k<3;k+=2){
+            }catch(ArrayIndexOutOfBoundsException ignore){}
+
+            for(int k=1;k>-2;k-=2){
+                try{
+                System.out.println("in the 2. trycatch");
                     if(tiles[x+j*k][y+i].isOccupied()&&isWhite!=tiles[x+j*k][y+i].getOccupant().isWhite()){
+                        System.out.println("in the 1. if");
                         if(!tiles[x+j*2*k][y+2*i].isOccupied()){
+                            System.out.println("in the 2. if");
                             moves.add(new Move(x+j*2*k,y+2*i,true,availableNow));
                             final Tile[][] alternative = copyBoard(tiles);
                             alternative[x+j*k][y+i].setOccupied(false);
@@ -41,9 +48,9 @@ public class Game {
                             moves.addAll(moveChecker(x+j*2*k,y+2*i,alternative,false));
                         }
                     }
-                }
+                }catch(ArrayIndexOutOfBoundsException ignore){}
+            }
 
-            }catch(ArrayIndexOutOfBoundsException ignore){}
         }
 
         return moves;
