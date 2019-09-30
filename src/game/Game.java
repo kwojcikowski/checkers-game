@@ -9,21 +9,29 @@ public class Game {
     private Controller controller;
     private Board board;
     private boolean whiteTurn;
+    private boolean isFinished;
 
     public void startGame(Controller controller){
         this.controller = controller;
         board = new Board();
         board.setBoard();
+        this.isFinished = false;
+    }
+
+    public void endGame(String winner){
+        controller.updateOnMouse();
+        controller.disableAllPieces();
+        System.out.println("Game Over!\nThe Winner is : "+winner);
     }
 
     void whiteTurn(){
-        whiteTurn = true;
+        this.whiteTurn = true;
         controller.disableBlackPieces();
         controller.enableWhitePieces();
     }
 
     void blackTurn(){
-        whiteTurn = false;
+        this.whiteTurn = false;
         controller.disableWhitePieces();
         /*
         AI black=new AI();
@@ -87,5 +95,13 @@ public class Game {
             }
         }
         return copy;
+    }
+
+    public boolean isFinished() {
+        return isFinished;
+    }
+
+    public void setFinished(boolean finished) {
+        isFinished = finished;
     }
 }
