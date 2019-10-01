@@ -9,12 +9,13 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Line;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 import pieces.Piece;
 
 import java.util.LinkedList;
 
-public class Controller {
+public class MultiController {
 
     @FXML private BorderPane container;
     @FXML private GridPane boardGrid;
@@ -294,5 +295,9 @@ public class Controller {
     public void disableAllPieces(){
         disableBlackPieces();
         disableWhitePieces();
+    }
+
+    public void setHiddenStage(Stage stage, Stage hiddenStage) {
+        stage.setOnCloseRequest(windowEvent -> hiddenStage.show());
     }
 }
