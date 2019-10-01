@@ -2,6 +2,8 @@ package pieces;
 
 import game.Move;
 import game.Tile;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 
 import java.util.LinkedList;
 
@@ -22,17 +24,15 @@ public abstract class Piece {
         return occupied;
     }
 
-    public Piece(Piece piece){
+    public Piece(Piece piece) {
         this.isWhite = piece.isWhite();
         this.occupied = piece.occupied;
     }
 
-    public Piece(boolean isWhite){
-        this.isWhite=isWhite;
+    public Piece(boolean isWhite) {
+        this.isWhite = isWhite;
     }
 
-    public abstract LinkedList<Move> moveChecker(final int x,final int y, final Tile[][] tiles,
+    public abstract LinkedList<Move> moveChecker(final int x, final int y, final Tile[][] tiles,
                                                  final boolean availableNow);
-
-
 }

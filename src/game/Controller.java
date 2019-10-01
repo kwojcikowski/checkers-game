@@ -25,6 +25,8 @@ public class Controller {
     private ImageView[][] piecesImages = new ImageView[8][8];
     private Image whitePieceImg;
     private Image blackPieceImg;
+    private Image whiteKingImg;
+    private Image blackKingImg;
     private Game game;
 
     private int numberOfWhiteTaken = 0;
@@ -40,6 +42,8 @@ public class Controller {
         //setting white and black piece img
         whitePieceImg = new Image(getClass().getResource("/img/whitePiece.png").toExternalForm());
         blackPieceImg = new Image(getClass().getResource("/img/blackPiece.png").toExternalForm());
+        whiteKingImg = new Image(getClass().getResource("/img/whiteKing.png").toExternalForm());
+        blackKingImg = new Image(getClass().getResource("/img/blackKing.png").toExternalForm());
 
         //Generate backend
         game = new Game();
@@ -77,16 +81,14 @@ public class Controller {
                     } else {
                         boardLayout[i][j].getChildren().clear();
                         ImageView view = new ImageView(blackPieceImg);
-                        view.toFront();
                         boardLayout[i][j].getChildren().add(view);
                         piecesImages[i][j] = view;
                     }
+                    occupant.setOccupied(t);
                 }
             }
         }
         enableWhitePieces();
-
-        promote((Pawn)board[2][0].getOccupant());
     }
 
     public void handlePieceClick(int row, int col){
@@ -131,11 +133,10 @@ public class Controller {
             public void handle(ActionEvent event) {
                 attachImage(currentRow, currentCol, targetRow, targetCol);
                 if (isAttacking) {
-                    int attackedRow = currentRow + (targetRow - currentRow)/2;
-                    int attackedCol = currentCol + (targetCol - currentCol)/2;
-                    handleAttackedPiece(attackedRow, attackedCol);
+                    handleAttackedPiece(currentRow, currentCol, targetRow, targetCol);
                     checkForFurtherMoves(targetRow, targetCol);
                 }
+                checkPromotion(targetRow, targetCol);
                 if(movingPiece.getImage().getUrl().contains("white")){
                     disableWhitePieces();
                     enableBlackPieces();
@@ -150,10 +151,22 @@ public class Controller {
 
     public void attachImage(int oldRow, int oldCol, int row, int col){
         Image img;
+        boolean isKing = false;
+        if(piecesImages[oldRow][oldCol].getImage().getUrl().contains("King")){
+            isKing = true;
+        }
         if(piecesImages[oldRow][oldCol].getImage().getUrl().contains("white")){
-            img = whitePieceImg;
+            if(isKing){
+                img = whiteKingImg;
+            }else {
+                img = whitePieceImg;
+            }
         }else{
-            img = blackPieceImg;
+            if(isKing){
+                img = blackKingImg;
+            }else {
+                img = blackPieceImg;
+            }
         }
         //Clear old spot
         container.getChildren().remove(piecesImages[oldRow][oldCol]);
@@ -206,7 +219,33 @@ public class Controller {
         }
     }
 
-    public void handleAttackedPiece(int row, int col){
+    public void handleAttackedPiece(int currentRow, int currentCol, int targetRow, int targetCol){
+        int row = -1;
+        int col = -1;
+
+        //Indicator if attacked in row below or above
+        int rowComponent;
+        if(currentRow - targetRow > 0)
+            rowComponent = -1;
+        else
+            rowComponent = 1;
+        //Indicator if attacked in col right or left
+        int colComponent;
+        if(currentCol - targetCol > 0)
+            colComponent = -1;
+        else
+            colComponent = 1;
+
+        //Find a piece that has been attacked
+        for(int i = currentRow, j = currentCol; i != targetRow && j != targetCol; i+=rowComponent, j+=colComponent){
+            if(board[i][j].isOccupied()){
+                if(board[i][j].getOccupant().isWhite() != board[targetRow][targetCol].getOccupant().isWhite()){
+                    row = i;
+                    col = j;
+                    break;
+                }
+            }
+        }
         ImageView takenPieceImg = piecesImages[row][col];
         VBox takenSpot = boardLayout[row][col];
         Piece takenPiece = board[row][col].getOccupant();
@@ -300,7 +339,39 @@ public class Controller {
         disableWhitePieces();
     }
 
-    protected void promote(Pawn pawn){
-        pawn.getOccupied().setOccupant(new King(pawn));
+    protected void checkPromotion(int row, int col){
+        ImageView newView = null;
+        boolean promotion = false;
+        //white promotion
+        if(board[row][col].getOccupant().isWhite()){
+            if(row == board.length-1) {
+                for(int i = 1; i < board[row].length; i+=2){
+                    if(col == i){
+                        newView = new ImageView(whiteKingImg);
+                        promotion = true;
+                    }
+                }
+            }
+        }else{
+            //black promotion
+            if(row == 0) {
+                for(int i = 1; i < board[row].length; i+=2){
+                    if(col == i){
+                        newView = new ImageView(blackKingImg);
+                        promotion = true;
+                    }
+                }
+            }
+        }
+        if(promotion) {
+            boardLayout[row][col].getChildren().clear();
+            boardLayout[row][col].getChildren().add(newView);
+            piecesImages[row][col] = newView;
+            King king = new King(board[row][col].getOccupant());
+            board[row][col].setOccupant(king);
+            newView.setOnMouseClicked(mouseEvent -> {
+                handlePieceClick(2, 0);
+            });
+        }
     }
 }

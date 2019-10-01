@@ -3,6 +3,8 @@ package pieces;
 import game.Board;
 import game.Move;
 import game.Tile;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 
 import java.util.LinkedList;
 
@@ -49,10 +51,6 @@ public class Pawn extends Piece {
                 }catch(ArrayIndexOutOfBoundsException ignore){}
             }
         }
-
         return moves;
     }
-
-
-
 }

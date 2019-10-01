@@ -14,9 +14,4 @@ public class Game {
     Board getBoard(){
         return board;
     }
-
-
-
-
-
 }
