@@ -13,21 +13,27 @@ import javafx.scene.layout.VBox;
 import javafx.scene.shape.Line;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import pieces.Piece;
+import pieces.*;
 
 import java.util.LinkedList;
 
 public class AIController {
     @FXML
     private BorderPane container;
-    @FXML private GridPane boardGrid;
-    @FXML private GridPane opponentTaken;
-    @FXML private GridPane playerTaken;
-    @FXML private VBox boardWrap;
+    @FXML
+    private GridPane boardGrid;
+    @FXML
+    private GridPane opponentTaken;
+    @FXML
+    private GridPane playerTaken;
+    @FXML
+    private VBox boardWrap;
     private Tile[][] board;
     private ImageView[][] piecesImages = new ImageView[8][8];
     private Image whitePieceImg;
     private Image blackPieceImg;
+    private Image whiteKingImg;
+    private Image blackKingImg;
     private Game game;
     private AI ai;
 
@@ -40,10 +46,12 @@ public class AIController {
 
     //Method runs when window initialized
     @FXML
-    public void initialize(){
+    public void initialize() {
         //setting white and black piece img
         whitePieceImg = new Image(getClass().getResource("/img/whitePiece.png").toExternalForm());
         blackPieceImg = new Image(getClass().getResource("/img/blackPiece.png").toExternalForm());
+        whiteKingImg = new Image(getClass().getResource("/img/whiteKing.png").toExternalForm());
+        blackKingImg = new Image(getClass().getResource("/img/blackKing.png").toExternalForm());
 
         //Generate backend
         game = new Game();
@@ -54,24 +62,24 @@ public class AIController {
         ai = new AI(this, game, piecesImages, boardLayout, container, boardWrap);
 
         //Generating board and assigning ids
-        for(int i = 0; i < boardGrid.getRowCount(); i++){
-            for (int j = 0; j < boardGrid.getColumnCount(); j++){
+        for (int i = 0; i < boardGrid.getRowCount(); i++) {
+            for (int j = 0; j < boardGrid.getColumnCount(); j++) {
                 VBox box = new VBox();
                 box.setAlignment(Pos.CENTER);
-                if((i+j) % 2 == 0) {
+                if ((i + j) % 2 == 0) {
                     box.setId("whiteTile");
-                }else{
+                } else {
                     box.setId("blackTile");
                 }
 
                 //Reversing board so 0,0 is in left bottom corner
-                boardLayout[boardGrid.getColumnCount()-1-j][i] = box;
+                boardLayout[boardGrid.getColumnCount() - 1 - j][i] = box;
                 boardGrid.add(box, i, j);
             }
         }
 
         //Placing pieces
-        for(int i = 0; i < board.length; i++) {
+        for (int i = 0; i < board.length; i++) {
             for (int j = 0; j < board[i].length; j++) {
                 Tile t = board[i][j];
                 if (t.isOccupied()) {
@@ -87,21 +95,23 @@ public class AIController {
                         piecesImages[i][j] = view;
                         boardLayout[i][j].getChildren().add(view);
                     }
+                    occupant.setOccupied(t);
                 }
             }
         }
         game.whiteTurn();
     }
 
-    public void handlePieceClick(int row, int col){
-        LinkedList<Move> fields = game.moveChecker(row, col, board, true, true);
+    public void handlePieceClick(int row, int col) {
+        Piece piece = board[row][col].getOccupant();
+        LinkedList<Move> fields = piece.moveChecker(row, col, board, true);
         setupFields(fields, row, col);
     }
 
-    public void movePiece(int currentRow, int currentCol, int targetRow, int targetCol, boolean isAttacking){
+    public void movePiece(int currentRow, int currentCol, int targetRow, int targetCol, boolean isAttacking) {
         //Detaching piece Object so it can move
         ImageView movingPiece = piecesImages[currentRow][currentCol];
-        VBox startingContainer =  boardLayout[currentRow][currentCol];
+        VBox startingContainer = boardLayout[currentRow][currentCol];
         startingContainer.getChildren().clear();
 
         //Attach to container so we can see it
@@ -112,16 +122,16 @@ public class AIController {
         //Calculating the path object has to move
         //Starting xPos of line
         double x = boardWrap.getLayoutX() + boardWrap.getBorder().getInsets().getLeft()
-                + startingContainer.getLayoutX() + startingContainer.getWidth()/2;
+                + startingContainer.getLayoutX() + startingContainer.getWidth() / 2;
         //Starting yPos of line
         double y = boardWrap.getLayoutY() + boardWrap.getBorder().getInsets().getTop()
-                + startingContainer.getLayoutY() + startingContainer.getHeight()/2;
+                + startingContainer.getLayoutY() + startingContainer.getHeight() / 2;
         //End point of X
         double endX = boardWrap.getLayoutX() + boardWrap.getBorder().getInsets().getLeft()
-                + targetContainer.getLayoutX() + targetContainer.getWidth()/2;
+                + targetContainer.getLayoutX() + targetContainer.getWidth() / 2;
         //End point of Y
         double endY = boardWrap.getLayoutY() + boardWrap.getBorder().getInsets().getTop()
-                + targetContainer.getLayoutY() + targetContainer.getHeight()/2;
+                + targetContainer.getLayoutY() + targetContainer.getHeight() / 2;
 
         //Transition effect
         Line line = new Line(x, y, endX, endY);
@@ -135,22 +145,23 @@ public class AIController {
                 attachImage(currentRow, currentCol, targetRow, targetCol);
                 boolean maintainTurn;
                 if (isAttacking) {
-                    int attackedRow = currentRow + (targetRow - currentRow)/2;
-                    int attackedCol = currentCol + (targetCol - currentCol)/2;
-                    handleAttackedPiece(attackedRow, attackedCol);
+                    handleAttackedPiece(currentRow, currentCol, targetRow, targetCol);
                     //Handling game end
-                    if(checkGameEnd()){
+                    if (checkGameEnd()) {
                         event.consume();
                     }
                     maintainTurn = checkForFurtherMoves(targetRow, targetCol);
                     //Change of turn
-                    if(maintainTurn){
-                        LinkedList<Move> moves = game.moveChecker(targetRow, targetCol, board, true, true);
+                    if (maintainTurn) {
+                        Piece temp = board[targetRow][targetCol].getOccupant();
+                        LinkedList<Move> moves = temp.moveChecker(targetRow, targetCol, board, true);
                         setupFields(moves, targetRow, targetCol);
-                    }else{
+                    } else {
+                        checkPromotion(targetRow, targetCol);
                         game.blackTurn();
                     }
-                }else{
+                } else {
+                    checkPromotion(targetRow, targetCol);
                     game.blackTurn();
                 }
             }
@@ -158,12 +169,24 @@ public class AIController {
         transition.play();
     }
 
-    public void attachImage(int oldRow, int oldCol, int row, int col){
+    public void attachImage(int oldRow, int oldCol, int row, int col) {
         Image img;
-        if(piecesImages[oldRow][oldCol].getImage().getUrl().contains("white")){
-            img = whitePieceImg;
-        }else{
-            img = blackPieceImg;
+        boolean isKing = false;
+        if (piecesImages[oldRow][oldCol].getImage().getUrl().contains("King")) {
+            isKing = true;
+        }
+        if (piecesImages[oldRow][oldCol].getImage().getUrl().contains("white")) {
+            if (isKing) {
+                img = whiteKingImg;
+            } else {
+                img = whitePieceImg;
+            }
+        } else {
+            if (isKing) {
+                img = blackKingImg;
+            } else {
+                img = blackPieceImg;
+            }
         }
         //Clear old spot
         container.getChildren().remove(piecesImages[oldRow][oldCol]);
@@ -182,48 +205,75 @@ public class AIController {
         updateOnMouse();
     }
 
-    public void setupFields(LinkedList<Move> fields, int currentRow, int currentCol){
+    public void setupFields(LinkedList<Move> fields, int currentRow, int currentCol) {
         updateOnMouse();
         //Change background of available field and set onClickEvent
-        for(Move m : fields){
+        for (Move m : fields) {
             int row = m.getX();
             int col = m.getY();
             boolean isAttacking = m.isAttacking();
-            if(m.isAvailableNow()){
+            if (m.isAvailableNow()) {
                 boardLayout[row][col].setOnMouseClicked(mouseEvent -> {
                     movePiece(currentRow, currentCol, row, col, isAttacking);
                 });
                 boardLayout[row][col].setId("available");
             }
-            if(isAttacking) boardLayout[row][col].setId("isAttacking");
+            if (isAttacking) boardLayout[row][col].setId("isAttacking");
 
         }
     }
 
     //This method resets board fields after showing available
     //also it resets onClickEvent
-    public void updateOnMouse(){
-        for(int i = 0; i < boardLayout.length; i++) {
+    public void updateOnMouse() {
+        for (int i = 0; i < boardLayout.length; i++) {
             for (int j = 0; j < boardLayout[i].length; j++) {
                 VBox box = boardLayout[i][j];
-                if(box.getId().equalsIgnoreCase("available")||
-                        box.getId().equalsIgnoreCase("notDirectlyAvailable")||
-                        box.getId().equalsIgnoreCase("isAttacking")){
+                if (box.getId().equalsIgnoreCase("available") ||
+                        box.getId().equalsIgnoreCase("notDirectlyAvailable") ||
+                        box.getId().equalsIgnoreCase("isAttacking")) {
                     box.setId("blackTile");
-                    box.setOnMouseClicked(mouseEvent -> {});
+                    box.setOnMouseClicked(mouseEvent -> {
+                    });
                 }
             }
         }
     }
 
-    public void handleAttackedPiece(int row, int col){
+    public void handleAttackedPiece(int currentRow, int currentCol, int targetRow, int targetCol) {
+        int row = -1;
+        int col = -1;
+
+        //Indicator if attacked in row below or above
+        int rowComponent;
+        if (currentRow - targetRow > 0)
+            rowComponent = -1;
+        else
+            rowComponent = 1;
+        //Indicator if attacked in col right or left
+        int colComponent;
+        if (currentCol - targetCol > 0)
+            colComponent = -1;
+        else
+            colComponent = 1;
+
+        //Find a piece that has been attacked
+        for (int i = currentRow, j = currentCol; i != targetRow && j != targetCol; i += rowComponent, j += colComponent) {
+            if (board[i][j].isOccupied()) {
+                if (board[i][j].getOccupant().isWhite() != board[targetRow][targetCol].getOccupant().isWhite()) {
+                    row = i;
+                    col = j;
+                    break;
+                }
+            }
+        }
         ImageView takenPieceImg = piecesImages[row][col];
         VBox takenSpot = boardLayout[row][col];
         Piece takenPiece = board[row][col].getOccupant();
-        if(takenPiece.isWhite()){
-            playerTaken.add(takenPieceImg, 0,numberOfWhiteTaken);
+        if (takenPiece.isWhite()) {
+            playerTaken.add(takenPieceImg, 0, numberOfWhiteTaken);
             numberOfWhiteTaken++;
-        }else{
+        } else {
             opponentTaken.add(takenPieceImg, 0, numberOfBlackTaken);
             numberOfBlackTaken++;
         }
@@ -232,24 +282,25 @@ public class AIController {
         piecesImages[row][col] = null;
     }
 
-    public boolean checkForFurtherMoves(int row, int col){
-        LinkedList<Move> moves = game.moveChecker(row, col, board, true, false);
+    public boolean checkForFurtherMoves(int row, int col) {
+        Piece piece = board[row][col].getOccupant();
+        LinkedList<Move> moves = piece.moveChecker(row, col, board, true);
         LinkedList<Move> availableMoves = new LinkedList<>();
-        if(moves.isEmpty())
+        if (moves.isEmpty())
             return false;
-        for(Move m : moves){
-            if(m.isAttacking()){
+        for (Move m : moves) {
+            if (m.isAttacking()) {
                 availableMoves.add(m);
             }
         }
         return !availableMoves.isEmpty();
     }
 
-    public void disableWhitePieces(){
-        for(ImageView[] row : piecesImages){
-            for(ImageView v : row){
-                if(v != null) {
-                    if(v.getImage().getUrl().contains("white")) {
+    public void disableWhitePieces() {
+        for (ImageView[] row : piecesImages) {
+            for (ImageView v : row) {
+                if (v != null) {
+                    if (v.getImage().getUrl().contains("white")) {
                         v.setOnMouseClicked(mouseEvent -> {
                         });
                     }
@@ -258,11 +309,11 @@ public class AIController {
         }
     }
 
-    public void disableBlackPieces(){
-        for(ImageView[] row : piecesImages){
-            for(ImageView v : row){
-                if(v != null) {
-                    if(v.getImage().getUrl().contains("black")) {
+    public void disableBlackPieces() {
+        for (ImageView[] row : piecesImages) {
+            for (ImageView v : row) {
+                if (v != null) {
+                    if (v.getImage().getUrl().contains("black")) {
                         v.setOnMouseClicked(mouseEvent -> {
                         });
                     }
@@ -271,14 +322,14 @@ public class AIController {
         }
     }
 
-    public void enableWhitePieces(){
-        for(int i = 0; i < piecesImages.length; i++){
-            for(int j = 0; j < piecesImages[i].length; j++){
+    public void enableWhitePieces() {
+        for (int i = 0; i < piecesImages.length; i++) {
+            for (int j = 0; j < piecesImages[i].length; j++) {
                 ImageView v = piecesImages[i][j];
-                if(v != null) {
+                if (v != null) {
                     int row = i;
                     int col = j;
-                    if(v.getImage().getUrl().contains("white")) {
+                    if (v.getImage().getUrl().contains("white")) {
                         v.setOnMouseClicked(mouseEvent -> handlePieceClick(row, col));
                     }
                 }
@@ -286,14 +337,14 @@ public class AIController {
         }
     }
 
-    public void enableBlackPieces(){
-        for(int i = 0; i < piecesImages.length; i++){
-            for(int j = 0; j < piecesImages[i].length; j++){
+    public void enableBlackPieces() {
+        for (int i = 0; i < piecesImages.length; i++) {
+            for (int j = 0; j < piecesImages[i].length; j++) {
                 ImageView v = piecesImages[i][j];
-                if(v != null) {
+                if (v != null) {
                     int row = i;
                     int col = j;
-                    if(v.getImage().getUrl().contains("black")) {
+                    if (v.getImage().getUrl().contains("black")) {
                         v.setOnMouseClicked(mouseEvent -> handlePieceClick(row, col));
                     }
                 }
@@ -301,18 +352,18 @@ public class AIController {
         }
     }
 
-    public void disableAllPieces(){
+    public void disableAllPieces() {
         disableBlackPieces();
         disableWhitePieces();
     }
 
-    public boolean checkGameEnd(){
-        if(playerTaken.getChildren().size() == 12){
+    public boolean checkGameEnd() {
+        if (playerTaken.getChildren().size() == 12) {
             updateOnMouse();
             game.endGame("Player");
             disableAllPieces();
             return true;
-        }else if(opponentTaken.getChildren().size() == 12){
+        } else if (opponentTaken.getChildren().size() == 12) {
             updateOnMouse();
             game.endGame("Player");
             disableAllPieces();
@@ -320,10 +371,49 @@ public class AIController {
         }
         return false;
     }
-    public void setHiddenScene(Stage stage, Stage hiddenStage){
+
+    public void setHiddenScene(Stage stage, Stage hiddenStage) {
         stage.setOnCloseRequest(windowEvent -> {
             hiddenStage.show();
-            game.endGame("No winner");
+            if(!game.isFinished()) {
+                game.endGame("No winner");
+            }
         });
+    }
+
+    protected void checkPromotion (int row, int col){
+        ImageView newView = null;
+        boolean promotion = false;
+        //white promotion
+        if (board[row][col].getOccupant().isWhite()) {
+            if (row == board.length - 1) {
+                for (int i = 1; i < board[row].length; i += 2) {
+                    if (col == i) {
+                        newView = new ImageView(whiteKingImg);
+                        promotion = true;
+                    }
+                }
+            }
+        } else {
+            //black promotion
+            if (row == 0) {
+                for (int i = 0; i < board[row].length; i += 2) {
+                    if (col == i) {
+                        newView = new ImageView(blackKingImg);
+                        promotion = true;
+                    }
+                }
+            }
+        }
+        if (promotion) {
+            boardLayout[row][col].getChildren().clear();
+            boardLayout[row][col].getChildren().add(newView);
+            piecesImages[row][col] = newView;
+            King king = new King(board[row][col].getOccupant());
+            board[row][col].setOccupant(king);
+            newView.setOnMouseClicked(mouseEvent -> {
+                handlePieceClick(2, 0);
+            });
+        }
     }
 }

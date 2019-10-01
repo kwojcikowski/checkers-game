@@ -109,9 +109,7 @@ public class AI implements Runnable{
                 controller.attachImage(currentRow, currentCol, targetRow, targetCol);
                 boolean maintainTurn;
                 if (isAttacking) {
-                    int attackedRow = currentRow + (targetRow - currentRow) / 2;
-                    int attackedCol = currentCol + (targetCol - currentCol) / 2;
-                    controller.handleAttackedPiece(attackedRow, attackedCol);
+                    controller.handleAttackedPiece(currentRow, currentCol, targetRow, targetCol);
                     //Check game end
                     if(controller.checkGameEnd()){
                         event.consume();
@@ -120,6 +118,8 @@ public class AI implements Runnable{
                     maintainTurn = controller.checkForFurtherMoves(targetRow, targetCol);
                     if (maintainTurn) {
                         moveAI(targetRow, targetCol);
+                    }else{
+                        controller.checkPromotion(targetRow, targetCol);
                     }
                 }
                 //Counting moves so we know how much we need to delay enabling white pieces
@@ -142,7 +142,8 @@ public class AI implements Runnable{
             for(int j = 0; j < board[i].length; j++) {
                 if (board[i][j].getOccupant() != null) {
                     if (!board[i][j].getOccupant().isWhite()) {
-                        moves = game.moveChecker(i, j, board, true, false);
+                        Piece temp = board[i][j].getOccupant();
+                        moves = temp.moveChecker(i, j, board, true);
                         if (moves.size() != 0) {
                             boolean attack = false;
                             for(Move m : moves){
@@ -186,7 +187,8 @@ public class AI implements Runnable{
         LinkedList<Move> attacks;
         Move target;
         attacks = new LinkedList<>();
-        moves = game.moveChecker(row, col, board, true, false);
+        Piece temp = board[row][col].getOccupant();
+        moves = temp.moveChecker(row, col, board, true);
         for(Move m : moves){
             if(m.isAttacking()){
                 attacks.add(m);
@@ -217,7 +219,6 @@ public class AI implements Runnable{
                     return;
                 }
             }
-            System.out.println(game.isFinished());
             if(game.isFinished()){
                 return;
             }

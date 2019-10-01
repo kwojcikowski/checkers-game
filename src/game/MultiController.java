@@ -15,6 +15,7 @@ import javafx.scene.layout.*;
 import javafx.scene.shape.Line;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import pieces.King;
 import pieces.Piece;
 
 import java.util.ArrayList;
@@ -31,6 +32,8 @@ public class MultiController {
     private ImageView[][] piecesImages = new ImageView[8][8];
     private Image whitePieceImg;
     private Image blackPieceImg;
+    private Image whiteKingImg;
+    private Image blackKingImg;
     private Game game;
 
     private int numberOfWhiteTaken = 0;
@@ -46,6 +49,8 @@ public class MultiController {
         //setting white and black piece img
         whitePieceImg = new Image(getClass().getResource("/img/whitePiece.png").toExternalForm());
         blackPieceImg = new Image(getClass().getResource("/img/blackPiece.png").toExternalForm());
+        whiteKingImg = new Image(getClass().getResource("/img/whiteKing.png").toExternalForm());
+        blackKingImg = new Image(getClass().getResource("/img/blackKing.png").toExternalForm());
 
         //Generate backend
         game = new Game();
@@ -83,7 +88,6 @@ public class MultiController {
                     } else {
                         boardLayout[i][j].getChildren().clear();
                         ImageView view = new ImageView(blackPieceImg);
-                        view.toFront();
                         boardLayout[i][j].getChildren().add(view);
                         piecesImages[i][j] = view;
                     }
@@ -93,8 +97,9 @@ public class MultiController {
         game.whiteTurn();
     }
 
-    public void handlePieceClick(int row, int col){
-        LinkedList<Move> fields = game.moveChecker(row, col, board, true, true);
+    public void handlePieceClick(int row, int col) {
+        Piece piece = board[row][col].getOccupant();
+        LinkedList<Move> fields = piece.moveChecker(row, col, board, true);
         setupFields(fields, row, col);
     }
 
@@ -135,9 +140,7 @@ public class MultiController {
                 boolean maintain = false;
                 attachImage(currentRow, currentCol, targetRow, targetCol);
                 if (isAttacking) {
-                    int attackedRow = currentRow + (targetRow - currentRow)/2;
-                    int attackedCol = currentCol + (targetCol - currentCol)/2;
-                    handleAttackedPiece(attackedRow, attackedCol);
+                    handleAttackedPiece(currentRow, currentCol, targetRow, targetCol);
                     if(checkGameEnd()){
                         event.consume();
                     }
@@ -150,8 +153,10 @@ public class MultiController {
                 //changing turns
                 if(!maintain) {
                     if (game.isWhiteTurn()) {
+                        checkPromotion(targetRow, targetCol);
                         game.blackTurn();
                     } else {
+                        checkPromotion(targetRow, targetCol);
                         game.whiteTurn();
                     }
                 }
@@ -160,12 +165,24 @@ public class MultiController {
         transition.play();
     }
 
-    public void attachImage(int oldRow, int oldCol, int row, int col){
+    public void attachImage(int oldRow, int oldCol, int row, int col) {
         Image img;
-        if(piecesImages[oldRow][oldCol].getImage().getUrl().contains("white")){
-            img = whitePieceImg;
-        }else{
-            img = blackPieceImg;
+        boolean isKing = false;
+        if (piecesImages[oldRow][oldCol].getImage().getUrl().contains("King")) {
+            isKing = true;
+        }
+        if (piecesImages[oldRow][oldCol].getImage().getUrl().contains("white")) {
+            if (isKing) {
+                img = whiteKingImg;
+            } else {
+                img = whitePieceImg;
+            }
+        } else {
+            if (isKing) {
+                img = blackKingImg;
+            } else {
+                img = blackPieceImg;
+            }
         }
         //Clear old spot
         container.getChildren().remove(piecesImages[oldRow][oldCol]);
@@ -176,7 +193,7 @@ public class MultiController {
         //Add to board
         boardLayout[row][col].getChildren().clear();
         boardLayout[row][col].getChildren().add(piecesImages[row][col]);
-        //Update backend borad
+        //Perform move on backend board
         board[row][col].setOccupant(board[oldRow][oldCol].getOccupant());
         board[oldRow][oldCol].setOccupied(false);
         board[row][col].setOccupied(true);
@@ -218,14 +235,40 @@ public class MultiController {
         }
     }
 
-    public void handleAttackedPiece(int row, int col){
+    public void handleAttackedPiece(int currentRow, int currentCol, int targetRow, int targetCol) {
+        int row = -1;
+        int col = -1;
+
+        //Indicator if attacked in row below or above
+        int rowComponent;
+        if (currentRow - targetRow > 0)
+            rowComponent = -1;
+        else
+            rowComponent = 1;
+        //Indicator if attacked in col right or left
+        int colComponent;
+        if (currentCol - targetCol > 0)
+            colComponent = -1;
+        else
+            colComponent = 1;
+
+        //Find a piece that has been attacked
+        for (int i = currentRow, j = currentCol; i != targetRow && j != targetCol; i += rowComponent, j += colComponent) {
+            if (board[i][j].isOccupied()) {
+                if (board[i][j].getOccupant().isWhite() != board[targetRow][targetCol].getOccupant().isWhite()) {
+                    row = i;
+                    col = j;
+                    break;
+                }
+            }
+        }
         ImageView takenPieceImg = piecesImages[row][col];
         VBox takenSpot = boardLayout[row][col];
         Piece takenPiece = board[row][col].getOccupant();
-        if(takenPiece.isWhite()){
-            playerTaken.add(takenPieceImg, 0,numberOfWhiteTaken);
+        if (takenPiece.isWhite()) {
+            playerTaken.add(takenPieceImg, 0, numberOfWhiteTaken);
             numberOfWhiteTaken++;
-        }else{
+        } else {
             opponentTaken.add(takenPieceImg, 0, numberOfBlackTaken);
             numberOfBlackTaken++;
         }
@@ -235,7 +278,8 @@ public class MultiController {
     }
 
     public boolean checkForFurtherMoves(int row, int col){
-        LinkedList<Move> moves = game.moveChecker(row, col, board, true, true);
+        Piece temp = board[row][col].getOccupant();
+        LinkedList<Move> moves = temp.moveChecker(row, col, board, true);
         LinkedList<Move> availableMoves = new LinkedList<>();
         if(moves.size() == 0)
             return false;
@@ -332,7 +376,7 @@ public class MultiController {
                     Tile t = board[i][j];
                     if(t.getOccupant() != null){
                         if(t.getOccupant().isWhite()){
-                            if(!game.moveChecker(i, j, board, true, false).isEmpty()) {
+                            if(!t.getOccupant().moveChecker(i, j, board, true).isEmpty()) {
                                 availableWhiteMoves = true;
                             }
                         }
@@ -346,7 +390,7 @@ public class MultiController {
                     Tile t = board[i][j];
                     if(t.getOccupant() != null){
                         if(t.getOccupant().isWhite()){
-                            if(!game.moveChecker(i, j, board, true, false).isEmpty()) {
+                            if(!t.getOccupant().moveChecker(i, j, board, true).isEmpty()) {
                                 availableBlackMoves = true;
                             }
                         }
@@ -376,5 +420,41 @@ public class MultiController {
             }
             hiddenStage.show();
         });
+    }
+
+    protected void checkPromotion (int row, int col){
+        ImageView newView = null;
+        boolean promotion = false;
+        //white promotion
+        if (board[row][col].getOccupant().isWhite()) {
+            if (row == board.length - 1) {
+                for (int i = 1; i < board[row].length; i += 2) {
+                    if (col == i) {
+                        newView = new ImageView(whiteKingImg);
+                        promotion = true;
+                    }
+                }
+            }
+        } else {
+            //black promotion
+            if (row == 0) {
+                for (int i = 0; i < board[row].length; i += 2) {
+                    if (col == i) {
+                        newView = new ImageView(blackKingImg);
+                        promotion = true;
+                    }
+                }
+            }
+        }
+        if (promotion) {
+            boardLayout[row][col].getChildren().clear();
+            boardLayout[row][col].getChildren().add(newView);
+            piecesImages[row][col] = newView;
+            King king = new King(board[row][col].getOccupant());
+            board[row][col].setOccupant(king);
+            newView.setOnMouseClicked(mouseEvent -> {
+                handlePieceClick(2, 0);
+            });
+        }
     }
 }

@@ -1,6 +1,6 @@
 package game;
 
-import pieces.Piece;
+import pieces.*;
 
 import java.util.Stack;
 
@@ -16,7 +16,6 @@ public class Tile {
 
     public void setOccupant(Piece occupant) {
         this.occupant = occupant;
-        //edited by kwojcikowski
         isOccupied = true;
     }
 
@@ -30,12 +29,8 @@ public class Tile {
 
     public void setOccupied(boolean occupied) {
         isOccupied = occupied;
-        //edit by kwojcikowski
         if(!occupied){
             occupant = null;
         }
-        //end
     }
-
-
 }
