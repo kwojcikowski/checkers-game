@@ -1,18 +1,23 @@
 package game;
 
 import javafx.animation.PathTransition;
+import javafx.animation.Transition;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Line;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import pieces.Piece;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 public class MultiController {
@@ -44,7 +49,7 @@ public class MultiController {
 
         //Generate backend
         game = new Game();
-        game.startGame();
+        game.startGame(this);
         board = game.getBoard().getTiles();
 
         //Generating board and assigning ids
@@ -85,11 +90,11 @@ public class MultiController {
                 }
             }
         }
-        enableWhitePieces();
+        game.whiteTurn();
     }
 
     public void handlePieceClick(int row, int col){
-        LinkedList<Move> fields = game.moveChecker(row, col, board, true);
+        LinkedList<Move> fields = game.moveChecker(row, col, board, true, true);
         setupFields(fields, row, col);
     }
 
@@ -127,19 +132,28 @@ public class MultiController {
         transition.setOnFinished(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
+                boolean maintain = false;
                 attachImage(currentRow, currentCol, targetRow, targetCol);
                 if (isAttacking) {
                     int attackedRow = currentRow + (targetRow - currentRow)/2;
                     int attackedCol = currentCol + (targetCol - currentCol)/2;
                     handleAttackedPiece(attackedRow, attackedCol);
-                    checkForFurtherMoves(targetRow, targetCol);
+                    if(checkGameEnd()){
+                        event.consume();
+                    }
+                    maintain = checkForFurtherMoves(targetRow, targetCol);
                 }
-                if(movingPiece.getImage().getUrl().contains("white")){
-                    disableWhitePieces();
-                    enableBlackPieces();
-                }else{
-                    disableBlackPieces();
-                    enableWhitePieces();
+                //game end also possible if pieces are blocked after non attacking move
+                if(checkGameEnd()){
+                    event.consume();
+                }
+                //changing turns
+                if(!maintain) {
+                    if (game.isWhiteTurn()) {
+                        game.blackTurn();
+                    } else {
+                        game.whiteTurn();
+                    }
                 }
             }
         });
@@ -220,20 +234,20 @@ public class MultiController {
         piecesImages[row][col] = null;
     }
 
-    public void checkForFurtherMoves(int row, int col){
-        LinkedList<Move> moves = game.moveChecker(row, col, board, true);
+    public boolean checkForFurtherMoves(int row, int col){
+        LinkedList<Move> moves = game.moveChecker(row, col, board, true, true);
         LinkedList<Move> availableMoves = new LinkedList<>();
         if(moves.size() == 0)
-            return;
+            return false;
         for(Move m : moves){
             if(m.isAttacking()){
                 availableMoves.add(m);
             }
         }
         if(availableMoves.size() == 0)
-            return;
+            return false;
         setupFields(availableMoves, row, col);
-        disableAllPieces();
+        return true;
     }
 
     public void disableWhitePieces(){
@@ -293,11 +307,74 @@ public class MultiController {
     }
 
     public void disableAllPieces(){
-        disableBlackPieces();
+        disableBlackPieces();;
         disableWhitePieces();
     }
 
+    public boolean checkGameEnd(){
+        if(playerTaken.getChildren().size() == 12){
+            updateOnMouse();
+            game.endGame("Player");
+            disableAllPieces();
+            return true;
+        }else if(opponentTaken.getChildren().size() == 12){
+            updateOnMouse();
+            game.endGame("Player");
+            disableAllPieces();
+            return true;
+        }
+        boolean availableWhiteMoves = true;
+        boolean availableBlackMoves = true;
+        if(game.isWhiteTurn()){
+            availableWhiteMoves = false;
+            for(int i = 0; i < board.length; i++){
+                for(int j = 0; j < board[i].length; j++){
+                    Tile t = board[i][j];
+                    if(t.getOccupant() != null){
+                        if(t.getOccupant().isWhite()){
+                            if(!game.moveChecker(i, j, board, true, false).isEmpty()) {
+                                availableWhiteMoves = true;
+                            }
+                        }
+                    }
+                }
+            }
+        }else{
+            availableBlackMoves = false;
+            for(int i = 0; i < board.length; i++){
+                for(int j = 0; j < board[i].length; j++){
+                    Tile t = board[i][j];
+                    if(t.getOccupant() != null){
+                        if(t.getOccupant().isWhite()){
+                            if(!game.moveChecker(i, j, board, true, false).isEmpty()) {
+                                availableBlackMoves = true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if(!availableWhiteMoves){
+            updateOnMouse();
+            game.endGame("Opponent");
+            disableAllPieces();
+            return true;
+        }
+        if(!availableBlackMoves){
+            updateOnMouse();
+            game.endGame("Player");
+            disableAllPieces();
+            return true;
+        }
+        return false;
+    }
+
     public void setHiddenStage(Stage stage, Stage hiddenStage) {
-        stage.setOnCloseRequest(windowEvent -> hiddenStage.show());
+        stage.setOnCloseRequest(windowEvent -> {
+            if(!game.isFinished()) {
+                game.endGame("No winner");
+            }
+            hiddenStage.show();
+        });
     }
 }
