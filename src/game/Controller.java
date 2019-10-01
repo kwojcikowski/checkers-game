@@ -10,7 +10,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.shape.Line;
 import javafx.util.Duration;
-import pieces.Piece;
+import pieces.*;
 
 import java.util.LinkedList;
 
@@ -85,10 +85,13 @@ public class Controller {
             }
         }
         enableWhitePieces();
+
+        promote((Pawn)board[2][0].getOccupant());
     }
 
     public void handlePieceClick(int row, int col){
-        LinkedList<Move> fields = game.moveChecker(row, col, board, true);
+        Piece piece=board[row][col].getOccupant();
+        LinkedList<Move> fields = piece.moveChecker(row, col, board, true);
         setupFields(fields, row, col);
     }
 
@@ -220,7 +223,8 @@ public class Controller {
     }
 
     public void checkForFurtherMoves(int row, int col){
-        LinkedList<Move> moves = game.moveChecker(row, col, board, true);
+        Piece piece=board[row][col].getOccupant();
+        LinkedList<Move> moves = piece.moveChecker(row, col, board, true);
         LinkedList<Move> availableMoves = new LinkedList<>();
         if(moves.size() == 0)
             return;
@@ -294,5 +298,9 @@ public class Controller {
     public void disableAllPieces(){
         disableBlackPieces();
         disableWhitePieces();
+    }
+
+    protected void promote(Pawn pawn){
+        pawn.getOccupied().setOccupant(new King(pawn));
     }
 }

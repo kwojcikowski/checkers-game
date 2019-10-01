@@ -1,6 +1,6 @@
 package game;
 
-import pieces.Piece;
+import pieces.*;
 
 import java.util.Stack;
 
