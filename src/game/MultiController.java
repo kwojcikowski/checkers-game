@@ -99,11 +99,14 @@ public class MultiController {
 
     public void handlePieceClick(int row, int col) {
         Piece piece = board[row][col].getOccupant();
-        LinkedList<Move> fields = piece.moveChecker(row, col, board, true);
+        LinkedList<Move> fields = piece.moveChecker(row, col, board, true, true);
         setupFields(fields, row, col);
     }
 
     public void movePiece(int currentRow, int currentCol, int targetRow, int targetCol, boolean isAttacking){
+        //Disabling pieces during move so others cant be moved
+        disableAllPieces();
+
         //Detaching piece Object so it can move
         ImageView movingPiece = piecesImages[currentRow][currentCol];
         VBox startingContainer =  boardLayout[currentRow][currentCol];
@@ -279,7 +282,7 @@ public class MultiController {
 
     public boolean checkForFurtherMoves(int row, int col){
         Piece temp = board[row][col].getOccupant();
-        LinkedList<Move> moves = temp.moveChecker(row, col, board, true);
+        LinkedList<Move> moves = temp.moveChecker(row, col, board, true, true);
         LinkedList<Move> availableMoves = new LinkedList<>();
         if(moves.size() == 0)
             return false;
@@ -376,7 +379,7 @@ public class MultiController {
                     Tile t = board[i][j];
                     if(t.getOccupant() != null){
                         if(t.getOccupant().isWhite()){
-                            if(!t.getOccupant().moveChecker(i, j, board, true).isEmpty()) {
+                            if(!t.getOccupant().moveChecker(i, j, board, true, false).isEmpty()) {
                                 availableWhiteMoves = true;
                             }
                         }
@@ -390,7 +393,7 @@ public class MultiController {
                     Tile t = board[i][j];
                     if(t.getOccupant() != null){
                         if(t.getOccupant().isWhite()){
-                            if(!t.getOccupant().moveChecker(i, j, board, true).isEmpty()) {
+                            if(!t.getOccupant().moveChecker(i, j, board, true, false).isEmpty()) {
                                 availableBlackMoves = true;
                             }
                         }

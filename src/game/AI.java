@@ -143,7 +143,7 @@ public class AI implements Runnable{
                 if (board[i][j].getOccupant() != null) {
                     if (!board[i][j].getOccupant().isWhite()) {
                         Piece temp = board[i][j].getOccupant();
-                        moves = temp.moveChecker(i, j, board, true);
+                        moves = temp.moveChecker(i, j, board, true, false);
                         if (moves.size() != 0) {
                             boolean attack = false;
                             for(Move m : moves){
@@ -188,7 +188,7 @@ public class AI implements Runnable{
         Move target;
         attacks = new LinkedList<>();
         Piece temp = board[row][col].getOccupant();
-        moves = temp.moveChecker(row, col, board, true);
+        moves = temp.moveChecker(row, col, board, true, false);
         for(Move m : moves){
             if(m.isAttacking()){
                 attacks.add(m);

@@ -104,11 +104,14 @@ public class AIController {
 
     public void handlePieceClick(int row, int col) {
         Piece piece = board[row][col].getOccupant();
-        LinkedList<Move> fields = piece.moveChecker(row, col, board, true);
+        LinkedList<Move> fields = piece.moveChecker(row, col, board, true, true);
         setupFields(fields, row, col);
     }
 
     public void movePiece(int currentRow, int currentCol, int targetRow, int targetCol, boolean isAttacking) {
+        //Disable all pieces so others cant be moved
+        disableAllPieces();
+
         //Detaching piece Object so it can move
         ImageView movingPiece = piecesImages[currentRow][currentCol];
         VBox startingContainer = boardLayout[currentRow][currentCol];
@@ -154,7 +157,7 @@ public class AIController {
                     //Change of turn
                     if (maintainTurn) {
                         Piece temp = board[targetRow][targetCol].getOccupant();
-                        LinkedList<Move> moves = temp.moveChecker(targetRow, targetCol, board, true);
+                        LinkedList<Move> moves = temp.moveChecker(targetRow, targetCol, board, true, true);
                         setupFields(moves, targetRow, targetCol);
                     } else {
                         checkPromotion(targetRow, targetCol);
@@ -284,7 +287,7 @@ public class AIController {
 
     public boolean checkForFurtherMoves(int row, int col) {
         Piece piece = board[row][col].getOccupant();
-        LinkedList<Move> moves = piece.moveChecker(row, col, board, true);
+        LinkedList<Move> moves = piece.moveChecker(row, col, board, true, true);
         LinkedList<Move> availableMoves = new LinkedList<>();
         if (moves.isEmpty())
             return false;

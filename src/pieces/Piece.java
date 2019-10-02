@@ -34,5 +34,5 @@ public abstract class Piece {
     }
 
     public abstract LinkedList<Move> moveChecker(final int x, final int y, final Tile[][] tiles,
-                                                 final boolean availableNow);
+                                                 final boolean availableNow, final boolean recursive);
 }

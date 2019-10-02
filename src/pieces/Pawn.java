@@ -20,7 +20,7 @@ public class Pawn extends Piece {
 
     @Override
     public LinkedList<Move> moveChecker(final int x, final int y, final Tile[][] tiles,
-                                        final boolean availableNow){
+                                        final boolean availableNow, final boolean recursive){
         LinkedList<Move> moves=new LinkedList<>();
         final boolean isWhite=tiles[x][y].getOccupant().isWhite();
         final int j;
@@ -41,11 +41,13 @@ public class Pawn extends Piece {
                     if(tiles[x+j*k][y+i].isOccupied()&&isWhite!=tiles[x+j*k][y+i].getOccupant().isWhite()){
                         if(!tiles[x+j*2*k][y+2*i].isOccupied()){
                             moves.add(new Move(x+j*2*k,y+2*i,true,availableNow));
-                            final Tile[][] alternative = Board.copyBoard(tiles);
-                            alternative[x+j*k][y+i].setOccupied(false);
-                            alternative[x+j*2*k][y+i*2].setOccupant(alternative[x][y].getOccupant());
-                            alternative[x][y].setOccupied(false);
-                            moves.addAll(moveChecker(x+j*2*k,y+2*i,alternative,false));
+                            if(recursive) {
+                                final Tile[][] alternative = Board.copyBoard(tiles);
+                                alternative[x + j * k][y + i].setOccupied(false);
+                                alternative[x + j * 2 * k][y + i * 2].setOccupant(alternative[x][y].getOccupant());
+                                alternative[x][y].setOccupied(false);
+                                moves.addAll(moveChecker(x + j * 2 * k, y + 2 * i, alternative, false, true));
+                            }
                         }
                     }
                 }catch(ArrayIndexOutOfBoundsException ignore){}
