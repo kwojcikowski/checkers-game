@@ -12,23 +12,21 @@ public class King extends Piece{
         super(piece);
     }
 
-    public King(boolean isWhite){
-        super(isWhite);
-    }
-
     @Override
     public LinkedList<Move> moveChecker(int x, int y, Tile[][] tiles, boolean availableNow) {
         LinkedList<Move> moves=new LinkedList<>();
         final boolean isWhite=tiles[x][y].getOccupant().isWhite();
         for(int i=-1; i<2; i+=2){
-            for(int j = -1; j < 2;j += 2){
-                int k = 1;
+            for(int j=-1; j<2;j+=2){
+                int k=1;
                 try{
                     //Moving on diagonals with no attack
-                    while(!tiles[x+i*k][y+j*k].isOccupied() && availableNow){
+                    while(!tiles[x+i*k][y+j*k].isOccupied()&&availableNow){
                         moves.add(new Move(x+i*k,y+j*k,false,true));
                         k++;
                     }
+                }catch(ArrayIndexOutOfBoundsException ignore){}
+                try{
                     //Attacks
                     if(tiles[x+i*k][y+j*k].isOccupied()) {
                         if (isWhite != tiles[x + i * k][y + j * k].getOccupant().isWhite()) {
