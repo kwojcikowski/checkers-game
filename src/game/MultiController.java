@@ -16,6 +16,7 @@ import javafx.scene.shape.Line;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import pieces.King;
+import pieces.Pawn;
 import pieces.Piece;
 
 import java.util.ArrayList;
@@ -97,6 +98,45 @@ public class MultiController {
         game.whiteTurn();
     }
 
+    public void clearBoard(){
+        for(int i = 0; i < board.length; i++){
+            for(int j = 0; j < board[i].length; j++){
+                deleteChecker(i, j);
+            }
+        }
+    }
+
+    //setup and delete methods to help in testing
+    public void setUpPawn(int row, int col, boolean isWhite){
+        ImageView view = null;
+        if(isWhite)
+            view = new ImageView(whitePieceImg);
+        else
+            view = new ImageView(blackPieceImg);
+        piecesImages[row][col] = view;
+        boardLayout[row][col].getChildren().clear();
+        boardLayout[row][col].getChildren().add(view);
+        board[row][col].setOccupant(new Pawn(isWhite));
+    }
+
+    public void setUpKing(int row, int col, boolean isWhite){
+        ImageView view;
+        if(isWhite)
+            view = new ImageView(whiteKingImg);
+        else
+            view = new ImageView(blackKingImg);
+        piecesImages[row][col] = view;
+        boardLayout[row][col].getChildren().clear();
+        boardLayout[row][col].getChildren().add(view);
+        board[row][col].setOccupant(new King(new Pawn(isWhite)));
+    }
+
+    public void deleteChecker(int row, int col){
+        boardLayout[row][col].getChildren().clear();
+        piecesImages[row][col] = null;
+        board[row][col].setOccupied(false);
+    }
+
     public void handlePieceClick(int row, int col) {
         Piece piece = board[row][col].getOccupant();
         LinkedList<Move> fields = piece.moveChecker(row, col, board, true, true);
@@ -144,9 +184,6 @@ public class MultiController {
                 attachImage(currentRow, currentCol, targetRow, targetCol);
                 if (isAttacking) {
                     handleAttackedPiece(currentRow, currentCol, targetRow, targetCol);
-                    if(checkGameEnd()){
-                        event.consume();
-                    }
                     maintain = checkForFurtherMoves(targetRow, targetCol);
                 }
                 //game end also possible if pieces are blocked after non attacking move
@@ -192,7 +229,6 @@ public class MultiController {
         piecesImages[oldRow][oldCol] = null;
         //Move in Image array
         piecesImages[row][col] = new ImageView(img);
-        piecesImages[row][col].setOnMouseClicked(mouseEvent -> handlePieceClick(row, col));
         //Add to board
         boardLayout[row][col].getChildren().clear();
         boardLayout[row][col].getChildren().add(piecesImages[row][col]);
@@ -211,12 +247,10 @@ public class MultiController {
             int row = m.getX();
             int col = m.getY();
             boolean isAttacking = m.isAttacking();
-            if(m.isAvailableNow()){
-                boardLayout[row][col].setOnMouseClicked(mouseEvent -> {
-                    movePiece(currentRow, currentCol, row, col, isAttacking);
-                });
-                boardLayout[row][col].setId("available");
-            }
+            boardLayout[row][col].setOnMouseClicked(mouseEvent -> {
+                movePiece(currentRow, currentCol, row, col, isAttacking);
+            });
+            if(m.isAvailableNow()) boardLayout[row][col].setId("available");
             if(isAttacking) boardLayout[row][col].setId("isAttacking");
 
         }
@@ -366,36 +400,31 @@ public class MultiController {
             return true;
         }else if(opponentTaken.getChildren().size() == 12){
             updateOnMouse();
-            game.endGame("Player");
+            game.endGame("Opponent");
             disableAllPieces();
             return true;
         }
-        boolean availableWhiteMoves = true;
-        boolean availableBlackMoves = true;
-        if(game.isWhiteTurn()){
-            availableWhiteMoves = false;
-            for(int i = 0; i < board.length; i++){
-                for(int j = 0; j < board[i].length; j++){
-                    Tile t = board[i][j];
-                    if(t.getOccupant() != null){
-                        if(t.getOccupant().isWhite()){
-                            if(!t.getOccupant().moveChecker(i, j, board, true, false).isEmpty()) {
-                                availableWhiteMoves = true;
-                            }
+        boolean availableWhiteMoves = false;
+        boolean availableBlackMoves = false;
+        for(int i = 0; i < board.length; i++){
+            for(int j = 0; j < board[i].length; j++){
+                Tile t = board[i][j];
+                if(t.getOccupant() != null){
+                    if(t.getOccupant().isWhite()){
+                        if(!t.getOccupant().moveChecker(i, j, board, true, false).isEmpty()) {
+                            availableWhiteMoves = true;
                         }
                     }
                 }
             }
-        }else{
-            availableBlackMoves = false;
-            for(int i = 0; i < board.length; i++){
-                for(int j = 0; j < board[i].length; j++){
-                    Tile t = board[i][j];
-                    if(t.getOccupant() != null){
-                        if(t.getOccupant().isWhite()){
-                            if(!t.getOccupant().moveChecker(i, j, board, true, false).isEmpty()) {
-                                availableBlackMoves = true;
-                            }
+        }
+        for(int i = 0; i < board.length; i++){
+            for(int j = 0; j < board[i].length; j++){
+                Tile t = board[i][j];
+                if(t.getOccupant() != null){
+                    if(!t.getOccupant().isWhite()){
+                        if(!t.getOccupant().moveChecker(i, j, board, true, false).isEmpty()) {
+                            availableBlackMoves = true;
                         }
                     }
                 }
