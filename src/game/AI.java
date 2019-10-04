@@ -27,6 +27,7 @@ public class AI implements Runnable{
     private BorderPane container;
     private VBox boardWrap;
     private Thread aiThread;
+    int recursionCounter;
 
     public AI(AIController controller, Game game, ImageView[][] piecesImages,
               VBox[][] boardLayout, BorderPane container, VBox boardWrap){
@@ -36,6 +37,7 @@ public class AI implements Runnable{
         this.boardLayout = boardLayout;
         this.container = container;
         this.boardWrap = boardWrap;
+        recursionCounter = 1;
         aiThread = new Thread(this);
         aiThread.start();
     }
@@ -56,7 +58,6 @@ public class AI implements Runnable{
         int row = randomPiece[0];
         int col = randomPiece[1];
         moveAI(row, col);
-        game.whiteTurn();
     }
 
     //can be recalled to handle attacks
@@ -121,6 +122,7 @@ public class AI implements Runnable{
                         controller.checkPromotion(targetRow, targetCol);
                     }
                 }
+                recursionCounter++;
             }
         });
         transition.play();
@@ -216,15 +218,20 @@ public class AI implements Runnable{
                     return;
                 }
             }
-            if(game.isFinished()){
+            if(game.isFinished()) {
                 return;
             }
             Platform.runLater(new Runnable() {
                 @Override
                 public void run() {
+                    recursionCounter = 1;
                     playAITurn();
                 }
             });
+            try{
+                Thread.sleep(recursionCounter * 300);
+            } catch (InterruptedException ignored) {}
+            game.whiteTurn();
         }
     }
 }

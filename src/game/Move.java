@@ -3,7 +3,7 @@ package game;
 import java.util.LinkedList;
 
 public class Move {
-
+    
     private int x;
     private int y;
     private boolean isAttacking;
@@ -33,7 +33,6 @@ public class Move {
     }
 
     public Move(){
-
     }
     public Move(int x, int y, boolean isAttacking, boolean isAvailableNow){
         this.x=x;
