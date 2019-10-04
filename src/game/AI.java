@@ -122,6 +122,7 @@ public class AI implements Runnable{
                         controller.checkPromotion(targetRow, targetCol);
                     }
                 }
+                controller.checkPromotion(targetRow, targetCol);
                 recursionCounter++;
             }
         });

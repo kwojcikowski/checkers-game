@@ -146,6 +146,7 @@ public class MultiController {
     public void movePiece(int currentRow, int currentCol, int targetRow, int targetCol, boolean isAttacking){
         //Disabling pieces during move so others cant be moved
         disableAllPieces();
+        boardLayout[targetRow][targetCol].setOnMouseClicked(mouseEvent -> {});
 
         //Detaching piece Object so it can move
         ImageView movingPiece = piecesImages[currentRow][currentCol];
@@ -247,10 +248,13 @@ public class MultiController {
             int row = m.getX();
             int col = m.getY();
             boolean isAttacking = m.isAttacking();
-            boardLayout[row][col].setOnMouseClicked(mouseEvent -> {
-                movePiece(currentRow, currentCol, row, col, isAttacking);
-            });
-            if(m.isAvailableNow()) boardLayout[row][col].setId("available");
+
+            if(m.isAvailableNow()){
+                boardLayout[row][col].setId("available");
+                boardLayout[row][col].setOnMouseClicked(mouseEvent -> {
+                    movePiece(currentRow, currentCol, row, col, isAttacking);
+                });
+            }
             if(isAttacking) boardLayout[row][col].setId("isAttacking");
 
         }

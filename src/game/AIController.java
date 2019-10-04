@@ -149,6 +149,7 @@ public class AIController {
     public void movePiece(int currentRow, int currentCol, int targetRow, int targetCol, boolean isAttacking) {
         //Disable all pieces so others cant be moved
         disableAllPieces();
+        boardLayout[targetRow][targetCol].setOnMouseClicked(mouseEvent -> {});
 
         //Detaching piece Object so it can move
         ImageView movingPiece = piecesImages[currentRow][currentCol];
@@ -195,7 +196,7 @@ public class AIController {
                     //Change of turn
                     if (maintainTurn) {
                         Piece temp = board[targetRow][targetCol].getOccupant();
-                        LinkedList<Move> moves = temp.moveChecker(targetRow, targetCol, board, false, true);
+                        LinkedList<Move> moves = temp.moveChecker(targetRow, targetCol, board, true, true);
                         setupFields(moves, targetRow, targetCol);
                     } else {
                         checkPromotion(targetRow, targetCol);
@@ -252,10 +253,12 @@ public class AIController {
             int row = m.getX();
             int col = m.getY();
             boolean isAttacking = m.isAttacking();
-            boardLayout[row][col].setOnMouseClicked(mouseEvent -> {
-                movePiece(currentRow, currentCol, row, col, isAttacking);
-            });
-            if(m.isAvailableNow()) boardLayout[row][col].setId("available");
+            if(m.isAvailableNow()){
+                boardLayout[row][col].setId("available");
+                boardLayout[row][col].setOnMouseClicked(mouseEvent -> {
+                    movePiece(currentRow, currentCol, row, col, isAttacking);
+                });
+            }
             if(isAttacking) boardLayout[row][col].setId("isAttacking");
 
         }
