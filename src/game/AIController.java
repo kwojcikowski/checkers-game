@@ -194,11 +194,7 @@ public class AIController {
                     }
                     maintainTurn = checkForFurtherMoves(targetRow, targetCol);
                     //Change of turn
-                    if (maintainTurn) {
-                        Piece temp = board[targetRow][targetCol].getOccupant();
-                        LinkedList<Move> moves = temp.moveChecker(targetRow, targetCol, board, true, true);
-                        setupFields(moves, targetRow, targetCol);
-                    } else {
+                    if (!maintainTurn) {
                         checkPromotion(targetRow, targetCol);
                         game.blackTurn();
                     }
@@ -334,6 +330,7 @@ public class AIController {
                 availableMoves.add(m);
             }
         }
+        setupFields(availableMoves, row, col);
         return !availableMoves.isEmpty();
     }
 
