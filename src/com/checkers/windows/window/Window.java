@@ -1,7 +1,7 @@
-package window;
+package com.checkers.windows.window;
 
-import game.AIController;
-import game.MultiController;
+import com.checkers.engine.controllers.AIController;
+import com.checkers.engine.controllers.MultiController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;

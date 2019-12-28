@@ -1,20 +1,17 @@
-package game;
+package com.checkers.engine.controllers;
 
-import javafx.animation.Animation;
+import com.checkers.engine.board.Move;
 import javafx.animation.PathTransition;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Line;
 import javafx.util.Duration;
-import pieces.Piece;
+import com.checkers.engine.pieces.Piece;
 
-import java.util.Arrays;
 import java.util.LinkedList;
 
 public class AI implements Runnable{
@@ -64,14 +61,14 @@ public class AI implements Runnable{
     public void moveAI(int row, int col){
         Move targetMove = getCorrectMove(row, col);
         if(targetMove != null) {
-            int targetRow = targetMove.getX();
+            int targetRow = targetMove.destina;
             int targetCol = targetMove.getY();
             boolean isAttacking = targetMove.isAttacking();
             movePiece(row, col, targetRow, targetCol, isAttacking);
         }
     }
 
-    //Individual method for black pieces as the actions occur after thread loop
+    //Individual method for black com.chess.engine.pieces as the actions occur after thread loop
     public void movePiece(int currentRow, int currentCol, int targetRow, int targetCol, boolean isAttacking){
         //Detaching piece Object so it can move
         ImageView movingPiece = piecesImages[currentRow][currentCol];
@@ -110,7 +107,7 @@ public class AI implements Runnable{
                 boolean maintainTurn;
                 if (isAttacking) {
                     controller.handleAttackedPiece(currentRow, currentCol, targetRow, targetCol);
-                    //Check game end
+                    //Check com.chess.engine.game end
                     if(controller.checkGameEnd()){
                         event.consume();
                     }
@@ -143,7 +140,7 @@ public class AI implements Runnable{
                 if (board[i][j].getOccupant() != null) {
                     if (!board[i][j].getOccupant().isWhite()) {
                         Piece temp = board[i][j].getOccupant();
-                        moves = temp.moveChecker(i, j, board, true, false);
+                        moves = temp.checkPossibleMoves(i, j, board, true, false);
                         if (moves.size() != 0) {
                             boolean attack = false;
                             for(Move m : moves){
@@ -188,7 +185,7 @@ public class AI implements Runnable{
         Move target;
         attacks = new LinkedList<>();
         Piece temp = board[row][col].getOccupant();
-        moves = temp.moveChecker(row, col, board, true, false);
+        moves = temp.checkPossibleMoves(row, col, board, true, false);
         for(Move m : moves){
             if(m.isAttacking()){
                 attacks.add(m);

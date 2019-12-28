@@ -1,4 +1,4 @@
-package startingWindow;
+package com.checkers.windows.startingWindow;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;

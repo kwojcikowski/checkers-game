@@ -1,4 +1,7 @@
-package game;
+package com.checkers.engine;
+
+import com.checkers.engine.board.Board;
+import com.checkers.engine.controllers.*;
 
 public class Game {
 
@@ -26,7 +29,7 @@ public class Game {
     }
 
     public void endGame(String winner){
-        System.out.println("Ending game");
+        System.out.println("Ending com.chess.engine.game");
         if(isMulti) {
             controller.updateOnMouse();
             controller.disableAllPieces();

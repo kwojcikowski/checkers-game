@@ -1,7 +1,7 @@
-package startingWindow;
+package com.checkers.windows.startingWindow;
 
 import javafx.stage.Stage;
-import window.Window;
+import com.checkers.windows.window.Window;
 
 public class StartingWindowController {
 
