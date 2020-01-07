@@ -1,29 +1,26 @@
 package com.checkers.windows.startingWindow;
 
+import com.checkers.windows.gameWindow.GameWindow;
 import javafx.stage.Stage;
-import com.checkers.windows.window.Window;
 
 public class StartingWindowController {
 
     private Stage currentStage;
-    public void multiplayerClicked(){
-        Window game = new Window();
-        game.setFxmlFile("WindowMultiplayer.fxml");
-        game.setHiddenStage(currentStage);
-        try {
-            game.start(new Stage());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        currentStage.hide();
+
+    public void runMultiplayerGame() {
+        launchGameScene(true);
     }
 
-    public void aiClicked(){
-        Window game = new Window();
-        game.setFxmlFile("WindowAI.fxml");
-        game.setHiddenStage(currentStage);
+    public void runAIGame(){
+        launchGameScene(false);
+    }
+
+    private void launchGameScene(boolean isMultiplayer){
+        GameWindow gameWindow = new GameWindow();
+        gameWindow.setStageToHide(currentStage);
+        gameWindow.setIsMultiplayer(isMultiplayer);
         try {
-            game.start(new Stage());
+            gameWindow.start(new Stage());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -34,3 +31,4 @@ public class StartingWindowController {
         this.currentStage = currentStage;
     }
 }
+

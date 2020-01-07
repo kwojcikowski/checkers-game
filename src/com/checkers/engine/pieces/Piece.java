@@ -18,8 +18,9 @@ public abstract class Piece {
         return occupiedTile;
     }
 
-    Piece(final Alliance alliance){
+    Piece(final Alliance alliance, Tile occupiedTile){
         pieceAlliance=alliance;
+        this.occupiedTile = occupiedTile;
     }
 
     final public int direction(){
@@ -30,11 +31,21 @@ public abstract class Piece {
         return pieceAlliance==Alliance.WHITE;
     }
 
-    void moveTo(final Tile destination){
-        occupiedTile.freeUp();
-        occupiedTile = destination;
+    final public Alliance getPieceAlliance(){
+        return pieceAlliance;
     }
 
-    abstract List<Move> checkForPossibleMoves(final Board board, final boolean isAvailableDirectly);
+    public void moveTo(final Tile destination){
+        occupiedTile.freeUp();
+        occupiedTile = destination;
+        occupiedTile.setOccupant(this);
+    }
+
+    public void takeDown(){
+        occupiedTile.freeUp();
+        occupiedTile = null;
+    }
+
+    public abstract List<Move> checkForPossibleMoves(final Board board, final boolean isAvailableDirectly);
 
 }

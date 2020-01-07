@@ -2,7 +2,7 @@ package com.checkers.engine.board;
 
 public class Move {
 
-    final Coordinates destinationCoordinates;
+    public final Coordinates destinationCoordinates;
     boolean isAttacking;
     private boolean availableNow;
     //TODO List<Move> nextPossibleMoves
@@ -13,11 +13,11 @@ public class Move {
         this.availableNow = isAvailableNow;
     }
 
-    boolean isAttacking() {
+    public boolean isAttacking() {
         return isAttacking;
     }
 
-    boolean isAvailableNow() {
+    public boolean isAvailableNow() {
         return availableNow;
     }
 }

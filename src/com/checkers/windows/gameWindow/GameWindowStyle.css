@@ -2,7 +2,7 @@
     -fx-background-repeat: stretch;
 }
 
-#boardWrap{
+#boardWrapper{
     -fx-background-color: #FBEFE1;
     -fx-border-width: 2;
     -fx-border-color: #8B4513;
@@ -31,7 +31,7 @@
 #blackTile{
     -fx-background-color: #8B4513;
 }
-#available{
+#isAvailable{
     -fx-background-color: rgba(12, 178, 241, 0.78);
 }
 #notDirectlyAvailable{

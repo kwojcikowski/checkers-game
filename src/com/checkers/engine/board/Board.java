@@ -7,18 +7,21 @@ import com.checkers.engine.board.Tile.*;
 
 public class Board {
 
-    final Tile[][] tiles;
-    private final int BOARD_SIZE = 8;
+    public static final int BOARD_SIZE = 8;
+    public static final int ROWS_OF_PIECES = 3;
 
-    protected Board(){
+    final Tile[][] tiles;
+
+    public Board(){
         tiles = new Tile[BOARD_SIZE][BOARD_SIZE];
         setupTiles();
+        setupBoard();
     }
 
     private void setupTiles() {
         for(int row = 0; row < tiles.length; row++){
             for(int column = 0; column < tiles[row].length; column++){
-                if((row+column)%2==0)
+                if(isBlackTile(row, column))
                     tiles[row][column] = new BlackTile(new Coordinates(row, column));
                 else
                     tiles[row][column] = new WhiteTile(new Coordinates(row, column));
@@ -26,26 +29,30 @@ public class Board {
         }
     }
 
-    protected void setupBoard(){
-        setupWhitePawns();
-        setupBlackPawns();
+    private boolean isBlackTile(int row, int column){
+        return (row + column) % 2 == 0;
     }
 
-    private void setupBlackPawns() {
-        for(int row=7;row>4;row--){
-            for(int col=0;col<8;col++){
+    protected void setupBoard(){
+        setupBlackPawns();
+        setupWhitePawns();
+    }
+
+    private void setupWhitePawns() {
+        for(int row=BOARD_SIZE-1;row >= BOARD_SIZE-ROWS_OF_PIECES;row--){
+            for(int col=0;col<BOARD_SIZE;col++){
                 if(tiles[row][col] instanceof BlackTile) {
-                    tiles[row][col].setOccupant(new Pawn(Alliance.BLACK));
+                    tiles[row][col].setOccupant(new Pawn(Alliance.WHITE, tiles[row][col]));
                 }
             }
         }
     }
 
-    private void setupWhitePawns() {
-        for(int row=0;row<3;row++){
-            for(int col=0;col<8;col++){
-                if(tiles[row][col] instanceof WhiteTile) {
-                    tiles[row][col].setOccupant(new Pawn(Alliance.WHITE));
+    private void setupBlackPawns() {
+        for(int row=0;row<ROWS_OF_PIECES;row++){
+            for(int col=0;col<BOARD_SIZE;col++){
+                if(tiles[row][col] instanceof BlackTile) {
+                    tiles[row][col].setOccupant(new Pawn(Alliance.BLACK, tiles[row][col]));
                 }
             }
         }

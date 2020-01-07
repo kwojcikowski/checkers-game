@@ -1,19 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.*?>
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-
-<VBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="260" prefWidth="460" style="-fx-background-image: url('com.chess.images.img/wood.png');" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.checkers.windows.startingWindow.StartingWindowController">
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<VBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="260" prefWidth="460" style="-fx-background-image: url('com/checkers/images/background.png');" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.checkers.windows.startingWindow.StartingWindowController">
    <children>
-      <Label fx:id="title" text="Welcome to checker com.checkers.engine.controllers by Rex Company!" />
+      <Label fx:id="titlePt1" text="Please choose the type of game" />
+      <Label fx:id="titlePt2" text="you would like to play: " />
       <Region prefHeight="200.0" prefWidth="200.0" />
-      <Button onAction="#multiplayerClicked" mnemonicParsing="false" text="Play multiplayer" />
+      <Button onAction="#runMultiplayerGame" mnemonicParsing="false" text="Play multiplayer" />
       <Region prefHeight="200.0" prefWidth="200.0" />
-      <Button onAction="#aiClicked" mnemonicParsing="false" text="Play vs AI" />
+      <Button  onAction="#runAIGame" mnemonicParsing="false" text="Play vs AI" />
       <Region prefHeight="200.0" prefWidth="200.0" />
    </children>
    <padding>

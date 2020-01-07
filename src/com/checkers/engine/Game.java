@@ -2,80 +2,32 @@ package com.checkers.engine;
 
 import com.checkers.engine.board.Board;
 import com.checkers.engine.controllers.*;
+import com.checkers.engine.pieces.Piece;
+
+import java.util.LinkedList;
+import java.util.List;
 
 public class Game {
 
-    private MultiController controller;
-    private AIController aiController;
     private Board board;
-    private boolean whiteTurn;
-    private boolean isFinished;
-    private boolean isMulti;
+    private Alliance turn;
 
-    public void startGame(MultiController controller){
-        this.controller = controller;
+    public Game(){
         board = new Board();
-        board.setBoard();
-        this.isFinished = false;
-        isMulti = true;
+        turn = Alliance.WHITE;
     }
 
-    public void startGame(AIController controller){
-        this.aiController = controller;
-        board = new Board();
-        board.setBoard();
-        this.isFinished = false;
-        isMulti = false;
+    public Alliance getTurn(){
+        return turn;
     }
 
-    public void endGame(String winner){
-        System.out.println("Ending com.chess.engine.game");
-        if(isMulti) {
-            controller.updateOnMouse();
-            controller.disableAllPieces();
-            setFinished(true);
-        }else{
-            aiController.updateOnMouse();
-            aiController.disableAllPieces();
-            setFinished(true);
-        }
-        System.out.println("Game Over!\nThe Winner is : "+winner);
+    public void nextTurn(){
+        turn = (turn == Alliance.WHITE) ? Alliance.BLACK : Alliance.WHITE;
     }
 
-    void whiteTurn(){
-        this.whiteTurn = true;
-        if(isMulti) {
-            controller.disableBlackPieces();
-            controller.enableWhitePieces();
-        }else{
-            aiController.disableBlackPieces();
-            aiController.enableWhitePieces();
-        }
-    }
-
-    void blackTurn(){
-        this.whiteTurn = false;
-        if(isMulti) {
-            controller.disableWhitePieces();
-            controller.enableBlackPieces();
-        }else{
-            aiController.disableWhitePieces();
-        }
-    }
-
-    public boolean isWhiteTurn(){
-        return whiteTurn;
-    }
-
-    Board getBoard(){
+    public Board getBoard(){
         return board;
     }
 
-    public boolean isFinished() {
-        return isFinished;
-    }
-
-    public void setFinished(boolean finished) {
-        isFinished = finished;
-    }
+    //TODO checking for game end
 }

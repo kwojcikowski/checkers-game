@@ -4,7 +4,7 @@ import com.checkers.engine.pieces.*;
 
 public abstract class Tile {
 
-    private final Coordinates tileCoordinates;
+    public final Coordinates tileCoordinates;
 
     Tile(final Coordinates tileCoordinates){
         this.tileCoordinates=tileCoordinates;
