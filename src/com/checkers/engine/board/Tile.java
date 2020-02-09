@@ -4,10 +4,10 @@ import com.checkers.engine.pieces.*;
 
 public abstract class Tile {
 
-    public final Coordinates tileCoordinates;
+    public final Coords tileCoords;
 
-    Tile(final Coordinates tileCoordinates){
-        this.tileCoordinates=tileCoordinates;
+    Tile(final Coords tileCoords){
+        this.tileCoords = tileCoords;
     }
 
     public abstract void setOccupant(Piece piece);
@@ -20,8 +20,8 @@ public abstract class Tile {
         private Piece occupant;
         private boolean isOccupied;
 
-        BlackTile(Coordinates tileCoordinates) {
-            super(tileCoordinates);
+        BlackTile(Coords tileCoords) {
+            super(tileCoords);
         }
 
         @Override
@@ -50,8 +50,8 @@ public abstract class Tile {
 
     public static class WhiteTile extends Tile {
 
-        WhiteTile(Coordinates tileCoordinates) {
-            super(tileCoordinates);
+        WhiteTile(Coords tileCoords) {
+            super(tileCoords);
         }
 
         @Override

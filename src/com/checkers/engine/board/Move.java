@@ -2,15 +2,19 @@ package com.checkers.engine.board;
 
 public class Move {
 
-    public final Coordinates destinationCoordinates;
+    public final Coords destinationCoords;
     boolean isAttacking;
     private boolean availableNow;
     //TODO List<Move> nextPossibleMoves
 
-    public Move(final Coordinates destinationCoordinates, final boolean isAttacking, final boolean isAvailableNow){
-        this.destinationCoordinates = destinationCoordinates;
+    private Move(final Coords destinationCoords, final boolean isAttacking, final boolean isAvailableNow){
+        this.destinationCoords = destinationCoords;
         this.isAttacking = isAttacking;
         this.availableNow = isAvailableNow;
+    }
+
+    public static Move to(final Coords destination, final boolean isAttacking, final boolean isAvailableNow){
+        return new Move(destination, isAttacking, isAvailableNow);
     }
 
     public boolean isAttacking() {

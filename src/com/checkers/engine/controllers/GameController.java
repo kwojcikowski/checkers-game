@@ -4,7 +4,7 @@ import com.checkers.engine.AIGame;
 import com.checkers.engine.Alliance;
 import com.checkers.engine.Game;
 import com.checkers.engine.board.Board;
-import com.checkers.engine.board.Coordinates;
+import com.checkers.engine.board.Coords;
 import com.checkers.engine.board.Move;
 import com.checkers.engine.board.Tile;
 import com.checkers.engine.pieces.Piece;
@@ -103,14 +103,14 @@ public class GameController {
     }
 
 
-    public void movePiece(Coordinates pieceCoordinates, Move moveToMake){
+    public void movePiece(Coords pieceCoords, Move moveToMake){
 
         disableAllInteractions();
 
-        int oldRow = pieceCoordinates.x;
-        int oldCol = pieceCoordinates.y;
-        int targetRow = moveToMake.destinationCoordinates.x;
-        int targetCol = moveToMake.destinationCoordinates.y;
+        int oldRow = pieceCoords.x;
+        int oldCol = pieceCoords.y;
+        int targetRow = moveToMake.destinationCoords.x;
+        int targetCol = moveToMake.destinationCoords.y;
         ImageView pieceImage = piecesImages[oldRow][oldCol];
         VBox startingTile = boardLayout[oldRow][oldCol];
         VBox targetTile = boardLayout[targetRow][targetCol];
@@ -175,10 +175,10 @@ public class GameController {
         Piece investigatedPiece = investigatedTile.getOccupant();
         List<Move> list = investigatedPiece.checkForPossibleMoves(board, true);
         for(Move m : list){
-            int destinationRow = m.destinationCoordinates.x;
-            int destinationColumn = m.destinationCoordinates.y;
+            int destinationRow = m.destinationCoords.x;
+            int destinationColumn = m.destinationCoords.y;
             boardLayout[destinationRow][destinationColumn].setOnMouseClicked(e ->
-                    movePiece(investigatedTile.tileCoordinates, m));
+                    movePiece(investigatedTile.tileCoords, m));
 
             if(m.isAvailableNow())
                 boardLayout[destinationRow][destinationColumn].setId("isAvailable");
@@ -193,10 +193,10 @@ public class GameController {
         Piece investigatedPiece = investigatedTile.getOccupant();
         List<Move> list = investigatedPiece.checkForPossibleMoves(board, true);
         for(Move m : list){
-            int destinationRow = m.destinationCoordinates.x;
-            int destinationColumn = m.destinationCoordinates.y;
+            int destinationRow = m.destinationCoords.x;
+            int destinationColumn = m.destinationCoords.y;
             if(m.isAvailableNow()) {
-                boardLayout[destinationRow][destinationColumn].setOnMouseClicked(e -> movePiece(investigatedTile.tileCoordinates, m));
+                boardLayout[destinationRow][destinationColumn].setOnMouseClicked(e -> movePiece(investigatedTile.tileCoords, m));
                 boardLayout[destinationRow][destinationColumn].setId("isAttacking");
             }
         }

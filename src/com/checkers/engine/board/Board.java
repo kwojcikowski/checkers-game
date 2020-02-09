@@ -22,9 +22,9 @@ public class Board {
         for(int row = 0; row < tiles.length; row++){
             for(int column = 0; column < tiles[row].length; column++){
                 if(isBlackTile(row, column))
-                    tiles[row][column] = new BlackTile(new Coordinates(row, column));
+                    tiles[row][column] = new BlackTile(Coords.at(row, column));
                 else
-                    tiles[row][column] = new WhiteTile(new Coordinates(row, column));
+                    tiles[row][column] = new WhiteTile(Coords.at(row, column));
             }
         }
     }
@@ -62,5 +62,5 @@ public class Board {
         return tiles;
     }
 
-    //TODO clone
+    //TODO clone?
 }
