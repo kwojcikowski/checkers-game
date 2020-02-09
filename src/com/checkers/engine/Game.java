@@ -17,6 +17,11 @@ public class Game {
         turn = Alliance.WHITE;
     }
 
+    Game(Game game){
+        this.board = game.board;
+        this.turn = game.turn;
+    }
+
     public Alliance getTurn(){
         return turn;
     }

@@ -1,5 +1,6 @@
 package com.checkers.windows.gameWindow;
 
+import com.checkers.engine.controllers.GameController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -18,6 +19,10 @@ public class GameWindow extends Application {
     public void start(Stage stage) throws Exception {
         FXMLLoader loader = new FXMLLoader(getClass().getResource(FXML_PATH));
         Parent root = loader.load();
+        if(!isMultiplayer){
+            GameController controller = loader.getController();
+            controller.evolveIntoAIGame();
+        }
 
         Scene gameScene = new Scene(root, WIDTH, HEIGHT);
         gameScene.getStylesheets().add(getClass().getResource(STYLE_PATH).toExternalForm());

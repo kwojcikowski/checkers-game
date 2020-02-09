@@ -6,8 +6,8 @@ public class AIGame extends Game {
 
     GameController controller;
 
-    public AIGame(GameController controller) {
-        super();
+    public AIGame(Game game, GameController controller){
+        super(game);
         this.controller = controller;
     }
 
@@ -15,6 +15,8 @@ public class AIGame extends Game {
     public void nextTurn() {
         super.nextTurn();
         if(getTurn() == Alliance.BLACK){
+            System.out.println("Hello, AI here");
+            super.nextTurn();
             //TODO AI moves
         }
     }

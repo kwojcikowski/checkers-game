@@ -1,5 +1,6 @@
 package com.checkers.engine.controllers;
 
+import com.checkers.engine.AIGame;
 import com.checkers.engine.Alliance;
 import com.checkers.engine.Game;
 import com.checkers.engine.board.Board;
@@ -49,6 +50,11 @@ public class GameController {
         renderBoard();
 
         resetMoveInteractions();
+    }
+
+    public void evolveIntoAIGame(){
+        System.out.println("Evolving");
+        game = new AIGame(game, this);
     }
 
     private void renderBoard(){
