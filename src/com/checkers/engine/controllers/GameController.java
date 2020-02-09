@@ -144,9 +144,8 @@ public class GameController {
             piecesImages[oldRow][oldCol] = null;
 
             if(moveToMake.isAttacking()){
-                int attackedPieceRow = Math.abs(targetRow - oldRow);
-                int attackedPieceCol = Math.abs(targetCol - oldCol);
-
+                int attackedPieceRow = moveToMake.attackedPieceCords.x;
+                int attackedPieceCol = moveToMake.attackedPieceCords.y;
                 Piece piece = board.getTiles()[attackedPieceRow][attackedPieceCol].getOccupant();
                 piece.takeDown();
                 takeDownPiece(attackedPieceRow, attackedPieceCol);
@@ -181,7 +180,10 @@ public class GameController {
                     movePiece(investigatedTile.tileCoords, m));
 
             if(m.isAvailableNow())
-                boardLayout[destinationRow][destinationColumn].setId("isAvailable");
+                if(m.isAttacking())
+                    boardLayout[destinationRow][destinationColumn].setId("isAttacking");
+                else
+                    boardLayout[destinationRow][destinationColumn].setId("isAvailable");
             else
                 boardLayout[destinationRow][destinationColumn].setId("isAttacking");
         }
@@ -191,12 +193,13 @@ public class GameController {
         resetMoveInteractions();
         Tile investigatedTile = board.getTiles()[row][col];
         Piece investigatedPiece = investigatedTile.getOccupant();
-        List<Move> list = investigatedPiece.checkForPossibleMoves(board, true);
+        List<Move> list = investigatedPiece.checkForPossibleMoves(board, false);
         for(Move m : list){
             int destinationRow = m.destinationCoords.x;
             int destinationColumn = m.destinationCoords.y;
-            if(m.isAvailableNow()) {
-                boardLayout[destinationRow][destinationColumn].setOnMouseClicked(e -> movePiece(investigatedTile.tileCoords, m));
+            if (m.isAvailableNow()) {
+                boardLayout[destinationRow][destinationColumn].setOnMouseClicked(e ->
+                        movePiece(investigatedTile.tileCoords, m));
                 boardLayout[destinationRow][destinationColumn].setId("isAttacking");
             }
         }

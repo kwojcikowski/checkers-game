@@ -12,6 +12,7 @@ public abstract class Tile {
 
     public abstract void setOccupant(Piece piece);
     public abstract boolean isOccupied();
+    public boolean isFree() { return !isOccupied(); }
     public abstract Piece getOccupant();
     public abstract void freeUp();
 

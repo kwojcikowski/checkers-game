@@ -44,6 +44,7 @@ public abstract class Piece {
         occupiedTile.freeUp();
         occupiedTile = destination;
         occupiedTile.setOccupant(this);
+        coords = occupiedTile.tileCoords;
     }
 
     public void takeDown(){

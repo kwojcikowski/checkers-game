@@ -34,8 +34,8 @@ public class Pawn extends Piece {
             try{
                 int x = coords.x+direction;
                 int y = coords.y+horizontalShift;
-                if(tiles[x][y].isOccupied()&&isDirect){
-                    moves.add(Move.to(Coords.at(x,y), false, true));
+                if(tiles[x][y].isFree()&&isDirect){
+                    moves.add(Move.to(Coords.at(x,y), false, true, null));
                 }
             }
             catch (ArrayIndexOutOfBoundsException ignore){}
@@ -44,8 +44,8 @@ public class Pawn extends Piece {
                     Tile tileToJumpOver = tiles[coords.x+direction*verticalShift][coords.y+horizontalShift];
                     Tile candidateTile = tiles[coords.x+2*direction*verticalShift][coords.y+2*horizontalShift];
                     if(tileToJumpOver.isOccupied() && areEnemies(tileToJumpOver.getOccupant())
-                            && !candidateTile.isOccupied()){
-                        moves.add(Move.to(candidateTile.tileCoords, true, true));
+                            && candidateTile.isFree()){
+                        moves.add(Move.to(candidateTile.tileCoords, true, true, tileToJumpOver.tileCoords));
                         //TODO recursive call
                     }
                 }catch (ArrayIndexOutOfBoundsException ignore){}
