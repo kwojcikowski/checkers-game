@@ -4,6 +4,8 @@ import com.checkers.engine.Alliance;
 import com.checkers.engine.pieces.*;
 import com.checkers.engine.board.Tile.*;
 
+import java.util.Arrays;
+
 
 public class Board {
 
@@ -16,6 +18,14 @@ public class Board {
         tiles = new Tile[BOARD_SIZE][BOARD_SIZE];
         setupTiles();
         setupBoard();
+    }
+
+    private Board(Board other){
+        tiles = other.tiles.clone();
+    }
+
+    public static Board copyOf(Board other){
+        return new Board(other);
     }
 
     private void setupTiles() {
@@ -62,5 +72,5 @@ public class Board {
         return tiles;
     }
 
-    //TODO clone?
+    //TODO clone? copy constructor?
 }

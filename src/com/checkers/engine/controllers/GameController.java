@@ -5,7 +5,8 @@ import com.checkers.engine.Alliance;
 import com.checkers.engine.Game;
 import com.checkers.engine.board.Board;
 import com.checkers.engine.board.Coords;
-import com.checkers.engine.board.Move;
+import com.checkers.engine.board.move.CapturingMove;
+import com.checkers.engine.board.move.Move;
 import com.checkers.engine.board.Tile;
 import com.checkers.engine.pieces.Piece;
 import javafx.animation.PathTransition;
@@ -143,17 +144,18 @@ public class GameController {
                 setupBlackPawn(targetRow, targetCol);
             piecesImages[oldRow][oldCol] = null;
 
-            if(moveToMake.isAttacking()){
-                int attackedPieceRow = moveToMake.attackedPieceCords.x;
-                int attackedPieceCol = moveToMake.attackedPieceCords.y;
+            if(moveToMake instanceof CapturingMove){
+                CapturingMove move = (CapturingMove)moveToMake;
+                Coords coords = move.getAttackedPieceCoords();
+                int attackedPieceRow = coords.x;
+                int attackedPieceCol = coords.y;
                 Piece piece = board.getTiles()[attackedPieceRow][attackedPieceCol].getOccupant();
                 piece.takeDown();
                 takeDownPiece(attackedPieceRow, attackedPieceCol);
                 if(pieceHasNoFurtherMoves(targetRow, targetCol)){
                     game.nextTurn();
                 }
-            }else
-                game.nextTurn();
+            }else game.nextTurn();
             resetMoveInteractions();
         });
 
@@ -177,7 +179,7 @@ public class GameController {
             int destinationRow = m.destinationCoords.x;
             int destinationColumn = m.destinationCoords.y;
             boardLayout[destinationRow][destinationColumn].setOnMouseClicked(e ->
-                    movePiece(investigatedTile.tileCoords, m));
+                    movePiece(investigatedTile.coords, m));
 
             if(m.isAvailableNow())
                 if(m.isAttacking())
@@ -199,7 +201,7 @@ public class GameController {
             int destinationColumn = m.destinationCoords.y;
             if (m.isAvailableNow()) {
                 boardLayout[destinationRow][destinationColumn].setOnMouseClicked(e ->
-                        movePiece(investigatedTile.tileCoords, m));
+                        movePiece(investigatedTile.coords, m));
                 boardLayout[destinationRow][destinationColumn].setId("isAttacking");
             }
         }

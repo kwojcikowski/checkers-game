@@ -3,7 +3,7 @@ package com.checkers.engine.pieces;
 import com.checkers.engine.Alliance;
 import com.checkers.engine.board.Board;
 import com.checkers.engine.board.Coords;
-import com.checkers.engine.board.Move;
+import com.checkers.engine.board.move.Move;
 import com.checkers.engine.board.Tile;
 
 import java.util.List;
@@ -21,22 +21,14 @@ public abstract class Piece {
     Piece(final Alliance alliance, Tile occupiedTile){
         pieceAlliance=alliance;
         this.occupiedTile = occupiedTile;
-        coords = occupiedTile.tileCoords;
+        coords = occupiedTile.coords;
     }
 
-    final public boolean isWhite() {
-        return pieceAlliance==Alliance.WHITE;
+    final public boolean areEnemies(Piece other){
+        return this.pieceAlliance!=other.pieceAlliance;
     }
 
-    public boolean areAllies(Piece other){
-        return this.pieceAlliance==other.pieceAlliance;
-    }
-
-    public boolean areEnemies(Piece other){
-        return !areAllies(other);
-    }
-
-    final public Alliance getPieceAlliance(){
+    public Alliance getPieceAlliance(){
         return pieceAlliance;
     }
 
@@ -44,7 +36,7 @@ public abstract class Piece {
         occupiedTile.freeUp();
         occupiedTile = destination;
         occupiedTile.setOccupant(this);
-        coords = occupiedTile.tileCoords;
+        coords = occupiedTile.coords;
     }
 
     public void takeDown(){

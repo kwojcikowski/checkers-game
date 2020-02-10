@@ -4,10 +4,10 @@ import com.checkers.engine.pieces.*;
 
 public abstract class Tile {
 
-    public final Coords tileCoords;
+    public final Coords coords;
 
-    Tile(final Coords tileCoords){
-        this.tileCoords = tileCoords;
+    Tile(final Coords coords){
+        this.coords = coords;
     }
 
     public abstract void setOccupant(Piece piece);

@@ -3,7 +3,8 @@ package com.checkers.engine.pieces;
 import com.checkers.engine.Alliance;
 import com.checkers.engine.board.Board;
 import com.checkers.engine.board.Coords;
-import com.checkers.engine.board.Move;
+import com.checkers.engine.board.move.Move;
+import com.checkers.engine.board.move.CapturingMove;
 import com.checkers.engine.board.Tile;
 
 import java.util.LinkedList;
@@ -34,8 +35,10 @@ public class Pawn extends Piece {
             try{
                 int x = coords.x+direction;
                 int y = coords.y+horizontalShift;
-                if(tiles[x][y].isFree()&&isDirect){
-                    moves.add(Move.to(Coords.at(x,y), false, true, null));
+                if(tiles[x][y].isFree() && isDirect){
+                    moves.add(
+                            Move.to(Coords.at(x, y), true)
+                    );
                 }
             }
             catch (ArrayIndexOutOfBoundsException ignore){}
@@ -45,8 +48,14 @@ public class Pawn extends Piece {
                     Tile candidateTile = tiles[coords.x+2*direction*verticalShift][coords.y+2*horizontalShift];
                     if(tileToJumpOver.isOccupied() && areEnemies(tileToJumpOver.getOccupant())
                             && candidateTile.isFree()){
-                        moves.add(Move.to(candidateTile.tileCoords, true, true, tileToJumpOver.tileCoords));
-                        //TODO recursive call
+                        moves.add(CapturingMove.to(candidateTile.coords, true, tileToJumpOver.coords));
+                        //TODO consider if block - recursive?
+                        Board alternativeBoard = Board.copyOf(board);
+                        Tile[][] alternativeTiles = alternativeBoard.getTiles();
+                        alternativeTiles[tileToJumpOver.coords.x][tileToJumpOver.coords.y].freeUp();
+                        alternativeTiles[coords.x][coords.y].getOccupant()
+                                .moveTo(alternativeTiles[candidateTile.coords.x][candidateTile.coords.y]);
+                        moves.addAll(checkForPossibleMoves(alternativeBoard, false));
                     }
                 }catch (ArrayIndexOutOfBoundsException ignore){}
             }
