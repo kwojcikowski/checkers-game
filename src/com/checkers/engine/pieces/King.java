@@ -12,7 +12,7 @@ import com.checkers.engine.board.Tile;
 
 public class King extends Piece{
 
-    King(final Alliance alliance, Tile occupiedTile){
+    public King(final Alliance alliance, Tile occupiedTile){
         super(alliance, occupiedTile);
     }
 

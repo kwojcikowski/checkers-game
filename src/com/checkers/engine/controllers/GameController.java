@@ -20,6 +20,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.shape.Line;
 import javafx.util.Duration;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import static com.checkers.engine.board.Board.BOARD_SIZE;
@@ -152,11 +153,21 @@ public class GameController {
                 Piece piece = board.getTiles()[attackedPieceRow][attackedPieceCol].getOccupant();
                 piece.takeDown();
                 takeDownPiece(attackedPieceRow, attackedPieceCol);
-                if(pieceHasNoFurtherMoves(targetRow, targetCol)){
+                List<Move> furtherMoves = getFurtherMoves(targetRow, targetCol);
+                System.out.println("Further moves : " + furtherMoves.size());
+                for(Move m : furtherMoves)
+                    System.out.println("X: " + m.destinationCoords.x + ", Y: " + m.destinationCoords.y);
+                removeHighlighting();
+                if(furtherMoves.isEmpty()){
                     game.nextTurn();
+                    resetMoveInteractions();
+                }else{
+                    displayMoves(targetRow, targetCol, furtherMoves);
                 }
-            }else game.nextTurn();
-            resetMoveInteractions();
+            }else {
+                game.nextTurn();
+                resetMoveInteractions();
+            }
         });
 
         transition.play();
@@ -178,34 +189,40 @@ public class GameController {
         for(Move m : list){
             int destinationRow = m.destinationCoords.x;
             int destinationColumn = m.destinationCoords.y;
-            boardLayout[destinationRow][destinationColumn].setOnMouseClicked(e ->
-                    movePiece(investigatedTile.coords, m));
-
-            if(m.isAvailableNow())
-                if(m.isAttacking())
+            if(m.isAvailableNow()) {
+                boardLayout[destinationRow][destinationColumn].setOnMouseClicked(e ->
+                        movePiece(investigatedTile.coords, m));
+                if (m.isAttacking())
                     boardLayout[destinationRow][destinationColumn].setId("isAttacking");
                 else
                     boardLayout[destinationRow][destinationColumn].setId("isAvailable");
-            else
+            }else
                 boardLayout[destinationRow][destinationColumn].setId("isAttacking");
         }
     }
 
-    private boolean pieceHasNoFurtherMoves(int row, int col){
-        resetMoveInteractions();
+    private List<Move> getFurtherMoves(int row, int col){
+        disableAllInteractions();
         Tile investigatedTile = board.getTiles()[row][col];
         Piece investigatedPiece = investigatedTile.getOccupant();
-        List<Move> list = investigatedPiece.checkForPossibleMoves(board, false);
-        for(Move m : list){
+        List<Move> allMoves = investigatedPiece.checkForPossibleMoves(board, true);
+        List<Move> availableMoves = new LinkedList<>();
+        for(Move move : allMoves)
+            if(move instanceof CapturingMove)
+                availableMoves.add(move);
+        return availableMoves;
+    }
+    
+    private void displayMoves(int row, int col, List<Move> moves){
+        for(Move m : moves){
             int destinationRow = m.destinationCoords.x;
             int destinationColumn = m.destinationCoords.y;
-            if (m.isAvailableNow()) {
+            if (m.isAvailableNow() && m.isAttacking()) {
                 boardLayout[destinationRow][destinationColumn].setOnMouseClicked(e ->
-                        movePiece(investigatedTile.coords, m));
+                        movePiece(board.getTiles()[row][col].coords, m));
                 boardLayout[destinationRow][destinationColumn].setId("isAttacking");
             }
         }
-        return list.isEmpty();
     }
 
     private void resetMoveInteractions(){
@@ -227,6 +244,18 @@ public class GameController {
         for(int row = 0; row < BOARD_SIZE; row++){
             for(int col = 0; col < BOARD_SIZE; col++){
                 disableField(row, col);
+            }
+        }
+    }
+
+    private void removeHighlighting(){
+        for(int row = 0; row < BOARD_SIZE; row++){
+            for(int col = 0; col < BOARD_SIZE; col++){
+                Tile tile  = board.getTiles()[row][col];
+                if(tile instanceof Tile.BlackTile)
+                    boardLayout[row][col].setId("blackTile");
+                else
+                    boardLayout[row][col].setId("whiteTile");
             }
         }
     }

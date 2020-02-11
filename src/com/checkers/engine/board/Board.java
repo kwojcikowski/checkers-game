@@ -4,8 +4,6 @@ import com.checkers.engine.Alliance;
 import com.checkers.engine.pieces.*;
 import com.checkers.engine.board.Tile.*;
 
-import java.util.Arrays;
-
 
 public class Board {
 
@@ -21,7 +19,16 @@ public class Board {
     }
 
     private Board(Board other){
-        tiles = other.tiles.clone();
+        tiles = new Tile[BOARD_SIZE][BOARD_SIZE];
+        for(int row = 0; row < tiles.length; row++) {
+            for (int col = 0; col < tiles[row].length; col++) {
+                try {
+                    tiles[row][col] = other.getTiles()[row][col].clone();
+                } catch (CloneNotSupportedException e) {
+                    System.out.println("Could not clone object");
+                }
+            }
+        }
     }
 
     public static Board copyOf(Board other){

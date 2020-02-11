@@ -15,6 +15,7 @@ public abstract class Tile {
     public boolean isFree() { return !isOccupied(); }
     public abstract Piece getOccupant();
     public abstract void freeUp();
+    protected abstract Tile clone() throws CloneNotSupportedException;
 
     public static class BlackTile extends Tile {
 
@@ -47,6 +48,19 @@ public abstract class Tile {
             isOccupied = false;
         }
 
+        @Override
+        protected BlackTile clone() throws CloneNotSupportedException {
+            BlackTile alternativeTile = new BlackTile(this.coords);
+            if(this.isOccupied){
+                Piece alternativePiece;
+                if(occupant instanceof Pawn)
+                    alternativePiece = new Pawn(occupant.getPieceAlliance(), alternativeTile);
+                else
+                    alternativePiece = new King(occupant.getPieceAlliance(), alternativeTile);
+                alternativeTile.setOccupant(alternativePiece);
+            }
+            return alternativeTile;
+        }
     }
 
     public static class WhiteTile extends Tile {
@@ -75,5 +89,9 @@ public abstract class Tile {
             throw new RuntimeException("Cannot free a white tile");
         }
 
+        @Override
+        protected WhiteTile clone() throws CloneNotSupportedException {
+            return new WhiteTile(this.coords);
+        }
     }
 }

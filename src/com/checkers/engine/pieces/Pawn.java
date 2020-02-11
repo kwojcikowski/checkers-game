@@ -48,19 +48,19 @@ public class Pawn extends Piece {
                     Tile candidateTile = tiles[coords.x+2*direction*verticalShift][coords.y+2*horizontalShift];
                     if(tileToJumpOver.isOccupied() && areEnemies(tileToJumpOver.getOccupant())
                             && candidateTile.isFree()){
-                        moves.add(CapturingMove.to(candidateTile.coords, true, tileToJumpOver.coords));
+                        moves.add(CapturingMove.to(candidateTile.coords, isDirect, tileToJumpOver.coords));
                         //TODO consider if block - recursive?
                         Board alternativeBoard = Board.copyOf(board);
                         Tile[][] alternativeTiles = alternativeBoard.getTiles();
                         alternativeTiles[tileToJumpOver.coords.x][tileToJumpOver.coords.y].freeUp();
                         alternativeTiles[coords.x][coords.y].getOccupant()
                                 .moveTo(alternativeTiles[candidateTile.coords.x][candidateTile.coords.y]);
-                        moves.addAll(checkForPossibleMoves(alternativeBoard, false));
+                        moves.addAll(alternativeTiles[candidateTile.coords.x][candidateTile.coords.y].getOccupant()
+                                .checkForPossibleMoves(alternativeBoard, false));
                     }
                 }catch (ArrayIndexOutOfBoundsException ignore){}
             }
         }
         return moves;
     }
-
 }
