@@ -21,7 +21,7 @@ public class King extends Piece{
     }
 
     @Override
-    public List<Move> checkForPossibleMoves(final Board board, final boolean isAvailableDirectly) {
+    public List<Move> checkForPossibleMoves(final Board board, final boolean isAvailableDirectly, final boolean recursive) {
         List<Move> moves = new LinkedList<>();
         Tile[][] tiles = board.getTiles();
         for(int horizontalShift = -1; horizontalShift < 2; horizontalShift += 2){

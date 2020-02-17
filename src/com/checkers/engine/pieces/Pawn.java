@@ -28,7 +28,7 @@ public class Pawn extends Piece {
     }
 
     @Override
-    public List<Move> checkForPossibleMoves(final Board board, final boolean isDirect) {
+    public List<Move> checkForPossibleMoves(final Board board, final boolean isDirect, final boolean recursive) {
         List<Move> moves = new LinkedList<>();
         Tile[][] tiles = board.getTiles();
         for(int horizontalShift = -1; horizontalShift < 3; horizontalShift += 2){
@@ -49,14 +49,15 @@ public class Pawn extends Piece {
                     if(tileToJumpOver.isOccupied() && areEnemies(tileToJumpOver.getOccupant())
                             && candidateTile.isFree()){
                         moves.add(CapturingMove.to(candidateTile.coords, isDirect, tileToJumpOver.coords));
-                        //TODO consider if block - recursive?
-                        Board alternativeBoard = Board.copyOf(board);
-                        Tile[][] alternativeTiles = alternativeBoard.getTiles();
-                        alternativeTiles[tileToJumpOver.coords.x][tileToJumpOver.coords.y].freeUp();
-                        alternativeTiles[coords.x][coords.y].getOccupant()
-                                .moveTo(alternativeTiles[candidateTile.coords.x][candidateTile.coords.y]);
-                        moves.addAll(alternativeTiles[candidateTile.coords.x][candidateTile.coords.y].getOccupant()
-                                .checkForPossibleMoves(alternativeBoard, false));
+                        if(recursive) {
+                            Board alternativeBoard = Board.copyOf(board);
+                            Tile[][] alternativeTiles = alternativeBoard.getTiles();
+                            alternativeTiles[tileToJumpOver.coords.x][tileToJumpOver.coords.y].freeUp();
+                            alternativeTiles[coords.x][coords.y].getOccupant()
+                                    .moveTo(alternativeTiles[candidateTile.coords.x][candidateTile.coords.y]);
+                            moves.addAll(alternativeTiles[candidateTile.coords.x][candidateTile.coords.y].getOccupant()
+                                    .checkForPossibleMoves(alternativeBoard, false));
+                        }
                     }
                 }catch (ArrayIndexOutOfBoundsException ignore){}
             }

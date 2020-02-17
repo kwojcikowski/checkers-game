@@ -9,15 +9,16 @@ import com.checkers.engine.board.move.CapturingMove;
 import com.checkers.engine.board.move.Move;
 import com.checkers.engine.board.Tile;
 import com.checkers.engine.pieces.Piece;
-import javafx.animation.PathTransition;
+import javafx.animation.TranslateTransition;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.shape.Line;
 import javafx.util.Duration;
 
 import java.util.LinkedList;
@@ -33,6 +34,7 @@ public class GameController {
     @FXML private GridPane opponentTaken;
     @FXML private GridPane playerTaken;
     @FXML private VBox boardWrap;
+    @FXML private StackPane boardStackPane;
 
     private Game game;
     private Board board;
@@ -55,7 +57,6 @@ public class GameController {
     }
 
     public void evolveIntoAIGame(){
-        System.out.println("Evolving");
         game = new AIGame(game, this);
     }
 
@@ -116,6 +117,7 @@ public class GameController {
         ImageView pieceImage = piecesImages[oldRow][oldCol];
         VBox startingTile = boardLayout[oldRow][oldCol];
         VBox targetTile = boardLayout[targetRow][targetCol];
+        Piece movingPiece = board.getTiles()[oldRow][oldCol].getOccupant();
 
         final double boardOffsetX = boardWrap.getLayoutX();
         final double boardOffsetY = boardWrap.getLayoutY();
@@ -125,24 +127,30 @@ public class GameController {
         double targetPointX = boardOffsetX + targetTile.getLayoutX() + targetTile.getWidth()/2;
         double targetPointY = boardOffsetY + targetTile.getLayoutY() + targetTile.getHeight()/2;
 
-        startingTile.getChildren().clear();
-        container.getChildren().add(pieceImage);
+        VBox movingBox = new VBox();
+        movingBox.setId("transparentTile");
+        boardStackPane.getChildren().add(movingBox);
+        StackPane.setMargin(movingBox,
+                new Insets(startingTile.getLayoutY(), 0, 0, startingTile.getLayoutX()));
+        movingBox.getChildren().add(pieceImage);
+        movingBox.setAlignment(Pos.CENTER);
 
-        Line line = new Line(startingPointX, startingPointY, targetPointX, targetPointY);
-        PathTransition transition = new PathTransition();
-        transition.setNode(pieceImage);
-        transition.setDuration(Duration.seconds(0.3));
-        transition.setPath(line);
+        startingTile.getChildren().clear();
+
+        TranslateTransition transition = new TranslateTransition();
+        transition.setByX(targetPointX - startingPointX);
+        transition.setByY(targetPointY - startingPointY);
+        transition.setDuration(Duration.seconds(0.5));
+        transition.setNode(movingBox);
 
         transition.setOnFinished(e -> {
-            board.getTiles()[oldRow][oldCol].getOccupant().moveTo(board.getTiles()[targetRow][targetCol]);
+            movingPiece.moveTo(board.getTiles()[targetRow][targetCol]);
 
-            container.getChildren().remove(piecesImages[oldRow][oldCol]);
-            boardLayout[targetRow][targetCol].getChildren().clear();
-            if(game.getTurn() == Alliance.WHITE)
-                setupWhitePawn(targetRow, targetCol);
-            else
-                setupBlackPawn(targetRow, targetCol);
+            targetTile.getChildren().clear();
+            targetTile.getChildren().add(pieceImage);
+            boardStackPane.getChildren().remove(movingBox);
+
+            piecesImages[targetRow][targetCol] = pieceImage;
             piecesImages[oldRow][oldCol] = null;
 
             if(moveToMake instanceof CapturingMove){
@@ -150,19 +158,20 @@ public class GameController {
                 Coords coords = move.getAttackedPieceCoords();
                 int attackedPieceRow = coords.x;
                 int attackedPieceCol = coords.y;
-                Piece piece = board.getTiles()[attackedPieceRow][attackedPieceCol].getOccupant();
-                piece.takeDown();
+                Piece attackedPiece = board.getTiles()[attackedPieceRow][attackedPieceCol].getOccupant();
+                attackedPiece.takeDown();
                 takeDownPiece(attackedPieceRow, attackedPieceCol);
-                List<Move> furtherMoves = getFurtherMoves(targetRow, targetCol);
-                System.out.println("Further moves : " + furtherMoves.size());
-                for(Move m : furtherMoves)
-                    System.out.println("X: " + m.destinationCoords.x + ", Y: " + m.destinationCoords.y);
+                List<Move> furtherMoves = getFurtherMoves(movingPiece);
                 removeHighlighting();
                 if(furtherMoves.isEmpty()){
                     game.nextTurn();
                     resetMoveInteractions();
-                }else{
-                    displayMoves(targetRow, targetCol, furtherMoves);
+                }else {
+                    if(game instanceof AIGame && game.getTurn() == Alliance.BLACK) {
+                        ((AIGame) game).performRandomAttackingMove(movingPiece);
+                    }else {
+                        displayMoves(targetRow, targetCol, furtherMoves);
+                    }
                 }
             }else {
                 game.nextTurn();
@@ -201,10 +210,8 @@ public class GameController {
         }
     }
 
-    private List<Move> getFurtherMoves(int row, int col){
+    private List<Move> getFurtherMoves(Piece investigatedPiece){
         disableAllInteractions();
-        Tile investigatedTile = board.getTiles()[row][col];
-        Piece investigatedPiece = investigatedTile.getOccupant();
         List<Move> allMoves = investigatedPiece.checkForPossibleMoves(board, true);
         List<Move> availableMoves = new LinkedList<>();
         for(Move move : allMoves)

@@ -44,6 +44,11 @@ public abstract class Piece {
         occupiedTile = null;
     }
 
-    public abstract List<Move> checkForPossibleMoves(final Board board, final boolean isAvailableDirectly);
+    public abstract List<Move> checkForPossibleMoves(final Board board,
+                                                     final boolean isAvailableDirectly, final boolean recursive);
+
+    public List<Move> checkForPossibleMoves(final Board board, final boolean isAvailableDirectly) {
+        return checkForPossibleMoves(board, isAvailableDirectly, true);
+    }
 
 }
