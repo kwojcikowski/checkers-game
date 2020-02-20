@@ -8,6 +8,8 @@ import com.checkers.engine.board.Coords;
 import com.checkers.engine.board.move.CapturingMove;
 import com.checkers.engine.board.move.Move;
 import com.checkers.engine.board.Tile;
+import com.checkers.engine.pieces.King;
+import com.checkers.engine.pieces.Pawn;
 import com.checkers.engine.pieces.Piece;
 import javafx.animation.TranslateTransition;
 import javafx.fxml.FXML;
@@ -164,6 +166,8 @@ public class GameController {
                 List<Move> furtherMoves = getFurtherMoves(movingPiece);
                 removeHighlighting();
                 if(furtherMoves.isEmpty()){
+                    if(canBePromoted(movingPiece))
+                        promote(movingPiece);
                     game.nextTurn();
                     resetMoveInteractions();
                 }else {
@@ -174,6 +178,8 @@ public class GameController {
                     }
                 }
             }else {
+                if(canBePromoted(movingPiece))
+                    promote(movingPiece);
                 game.nextTurn();
                 resetMoveInteractions();
             }
@@ -274,4 +280,29 @@ public class GameController {
     private void disableField(int row, int col){
         boardLayout[row][col].setOnMouseClicked(e -> {});
     }
+
+    private boolean canBePromoted(Piece piece){
+        if(piece instanceof Pawn){
+            if(piece.getPieceAlliance() == Alliance.BLACK)
+                return piece.coords.x == BOARD_SIZE -1;
+            else
+                return piece.coords.x == 0;
+        }else
+            return false;
+    }
+
+    private void promote(Piece piece){
+        piece = King.from((Pawn) piece);
+
+        boardLayout[piece.coords.x][piece.coords.y].getChildren().clear();
+        Image img;
+        if(piece.getPieceAlliance() == Alliance.BLACK)
+            img = new Image("com/checkers/images/blackKing.png");
+        else
+            img = new Image("com/checkers/images/whiteKing.png");
+        ImageView view = new ImageView(img);
+        boardLayout[piece.coords.x][piece.coords.y].getChildren().add(view);
+        piecesImages[piece.coords.x][piece.coords.y] = view;
+    }
+
 }

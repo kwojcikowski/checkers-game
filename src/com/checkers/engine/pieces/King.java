@@ -16,8 +16,10 @@ public class King extends Piece{
         super(alliance, occupiedTile);
     }
 
-    protected static King from(final Pawn pawn) {
-        return new King(pawn.pieceAlliance, pawn.getOccupied());
+    public static King from(final Pawn pawn) {
+        King king = new King(pawn.pieceAlliance, pawn.getOccupied());
+        pawn.getOccupied().setOccupant(king);
+        return king;
     }
 
     @Override
@@ -26,26 +28,26 @@ public class King extends Piece{
         Tile[][] tiles = board.getTiles();
         for(int horizontalShift = -1; horizontalShift < 2; horizontalShift += 2){
             for(int verticalShift = -1; verticalShift < 2; verticalShift += 2){
-                int distance = 1;
-                int x = coords.x + horizontalShift + distance;
-                int y = coords.y + verticalShift + distance;
+                int x = coords.x + horizontalShift;
+                int y = coords.y + verticalShift;
                 try{
-                    while(tiles[x][y].isFree() && isAvailableDirectly){
-                        moves.add(
-                                Move.to(Coords.at(x, y), true)
-                        );
-                        x += distance;
-                        y += distance;
+                    while(tiles[x][y].isFree()){
+                        if (isAvailableDirectly)
+                            moves.add(Move.to(Coords.at(x, y), true));
+                        x += horizontalShift;
+                        y += verticalShift;
                     }
-                }catch(ArrayIndexOutOfBoundsException ignore){}
-                try{
                     Tile tileToJumpOver = tiles[x][y];
                     if(tileToJumpOver.isOccupied() && areEnemies(tileToJumpOver.getOccupant())){
-                        while(tiles[x+horizontalShift][y+verticalShift].isFree()){
+                        x += horizontalShift;
+                        y += verticalShift;
+                        while(tiles[x][y].isFree()){
                             moves.add(
-                                    CapturingMove.to(Coords.at(x+horizontalShift, y+verticalShift),
+                                    CapturingMove.to(Coords.at(x, y),
                                             true, tileToJumpOver.coords)
                             );
+                            x += horizontalShift;
+                            y += verticalShift;
                             //TODO recursive call
                         }
                     }
