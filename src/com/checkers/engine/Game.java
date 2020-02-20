@@ -1,6 +1,7 @@
 package com.checkers.engine;
 
 import com.checkers.engine.board.Board;
+import com.checkers.engine.board.Tile;
 import com.checkers.engine.controllers.*;
 import com.checkers.engine.pieces.Piece;
 
@@ -34,5 +35,20 @@ public class Game {
         return board;
     }
 
-    //TODO checking for game end
+    public boolean isEndOfGame(){
+        Tile[][] tiles = getBoard().getTiles();
+        for(Tile[] row : tiles) {
+            for (Tile tile : row) {
+                if (tile.isOccupied() && tile.getOccupant().getPieceAlliance() == turn) {
+                    if (!tile.getOccupant().checkForPossibleMoves(getBoard(), true).isEmpty())
+                        return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    public Alliance getWinner(){
+        return (turn == Alliance.WHITE) ? Alliance.BLACK : Alliance.WHITE;
+    }
 }

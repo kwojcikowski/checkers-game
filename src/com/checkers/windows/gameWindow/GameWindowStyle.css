@@ -51,3 +51,45 @@
 #isAttacking {
     -fx-background-color: rgba(248, 0, 27, 0.54);
 }
+
+#gameEndBox {
+    -fx-min-width: 400;
+    -fx-max-width: 400;
+    -fx-min-height: 180;
+    -fx-max-height: 180;
+    -fx-background-color: #C19A6B;
+    -fx-border-width: 3;
+    -fx-border-color: #8B4513;
+    -fx-border-radius: 15;
+    -fx-background-radius: 15;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.8), 10, 0, 0, 0);
+    -fx-spacing: 15;
+    -fx-font-family: Corbel;
+}
+
+#gameOverLabel{
+    -fx-font-size: 36;
+    -fx-text-fill: #8B4513;
+    -fx-font-style: italic;
+    -fx-font-weight: 600;
+}
+
+#winnerLabel{
+    -fx-font-size: 16;
+    -fx-font-style: italic;
+    -fx-text-fill: #FBEFE1;
+}
+
+#playAgainButton{
+    -fx-background-color: rgba(0,0,0,0);
+    -fx-border-radius: 5;
+    -fx-background-radius: 5;
+    -fx-border-width: 2;
+    -fx-border-color: #8B4513;
+    -fx-font-size: 16;
+}
+
+#playAgainButton:hover{
+    -fx-background-color: #E8E0CF;
+    -fx-cursor: hand;
+}

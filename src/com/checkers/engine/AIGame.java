@@ -12,6 +12,8 @@ public class AIGame extends Game {
     private HashMap<Piece, List<Move>> movesForPiece;
     private HashMap<Piece, List<Move>> capturingMovesForPiece;
     private GameController controller;
+    private boolean lockAI;
+    private Random randomGenerator = new Random();
 
     public AIGame(Game game, GameController controller){
         super(game);
@@ -32,7 +34,7 @@ public class AIGame extends Game {
     @Override
     public void nextTurn() {
         super.nextTurn();
-        if(getTurn() == Alliance.BLACK){
+        if(getTurn() == Alliance.BLACK && !isEndOfGame()){
             loadPiecesIntoMap();
             computePossibleMoves();
             Piece randomlySelectedPiece;
@@ -65,27 +67,27 @@ public class AIGame extends Game {
 
     private Piece takeRandomAttackingPiece(){
         Object[] keys = capturingMovesForPiece.keySet().toArray();
-        return (Piece) keys[new Random().nextInt(keys.length)];
+        return (Piece) keys[randomGenerator.nextInt(keys.length)];
     }
 
     private Piece takeRandomMovablePiece(){
         Object[] keys = movesForPiece.keySet().toArray();
-        Piece selectedPiece = (Piece) keys[new Random().nextInt(keys.length)];
+        Piece selectedPiece = (Piece) keys[randomGenerator.nextInt(keys.length)];
         while (movesForPiece.get(selectedPiece).isEmpty()){
-            selectedPiece = (Piece) keys[new Random().nextInt(keys.length)];
+            selectedPiece = (Piece) keys[randomGenerator.nextInt(keys.length)];
         }
         return selectedPiece;
     }
 
     private void performRandomMove(Piece movedPiece, List<Move> consideredMoves){
-        int randomIndex = new Random().nextInt(consideredMoves.size());
+        int randomIndex = randomGenerator.nextInt(consideredMoves.size());
         controller.movePiece(movedPiece.coords, consideredMoves.get(randomIndex));
     }
 
     public void performRandomAttackingMove(Piece piece){
         List<Move> consideredMoves = piece.checkForPossibleMoves(getBoard(), false, false);
         if(!consideredMoves.isEmpty()) {
-            int randomIndex = new Random().nextInt(consideredMoves.size());
+            int randomIndex = randomGenerator.nextInt(consideredMoves.size());
             controller.movePiece(piece.coords, consideredMoves.get(randomIndex));
         }
     }

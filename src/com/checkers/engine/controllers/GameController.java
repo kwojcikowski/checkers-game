@@ -15,6 +15,8 @@ import javafx.animation.TranslateTransition;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
@@ -55,6 +57,11 @@ public class GameController {
         board = game.getBoard();
         renderBoard();
 
+        playerTakenCounter = 0;
+        opponentTakenCounter = 0;
+        opponentTaken.getChildren().clear();
+        playerTaken.getChildren().clear();
+
         resetMoveInteractions();
     }
 
@@ -63,6 +70,7 @@ public class GameController {
     }
 
     private void renderBoard(){
+        boardGrid.getChildren().clear();
         for (int row = 0; row < boardGrid.getRowCount(); row++) {
             for (int column = 0; column < boardGrid.getColumnCount(); column++) {
                 renderTile(row, column);
@@ -183,6 +191,8 @@ public class GameController {
                 game.nextTurn();
                 resetMoveInteractions();
             }
+            if(game.isEndOfGame())
+                endGame();
         });
 
         transition.play();
@@ -305,4 +315,29 @@ public class GameController {
         piecesImages[piece.coords.x][piece.coords.y] = view;
     }
 
+    public void endGame(){
+        disableAllInteractions();
+        boardStackPane.setAlignment(Pos.CENTER);
+        VBox messageContainer = new VBox();
+        messageContainer.setId("gameEndBox");
+        messageContainer.setAlignment(Pos.CENTER);
+        Label gameOverLabel = new Label("Game Over!");
+        gameOverLabel.setId("gameOverLabel");
+        String winnerString = game.getWinner().toString().charAt(0) + game.getWinner().toString().substring(1).toLowerCase();
+        Label winner = new Label(winnerString + " player wins!");
+        winner.setId("winnerLabel");
+        Button playAgain = new Button("Play again");
+        playAgain.setId("playAgainButton");
+        boolean isAIGame = game instanceof AIGame;
+        playAgain.setOnMouseClicked(e -> {
+            boardStackPane.setAlignment(Pos.TOP_LEFT);
+            boardStackPane.getChildren().remove(messageContainer);
+            initialize();
+            if(isAIGame)
+                evolveIntoAIGame();
+        });
+
+        messageContainer.getChildren().addAll(gameOverLabel, winner, playAgain);
+        boardStackPane.getChildren().add(messageContainer);
+    }
 }
