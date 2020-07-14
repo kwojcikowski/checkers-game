@@ -6,9 +6,9 @@ import com.checkers.engine.Game;
 import com.checkers.engine.board.BlackTile;
 import com.checkers.engine.board.Board;
 import com.checkers.engine.board.Coords;
+import com.checkers.engine.board.Tile;
 import com.checkers.engine.board.move.CapturingMove;
 import com.checkers.engine.board.move.Move;
-import com.checkers.engine.board.Tile;
 import com.checkers.engine.pieces.King;
 import com.checkers.engine.pieces.Pawn;
 import com.checkers.engine.pieces.Piece;
@@ -130,13 +130,13 @@ public class GameController {
         VBox targetTile = boardLayout[targetRow][targetCol];
         Piece movingPiece = board.getTiles()[oldRow][oldCol].getOccupant();
 
-        final double boardOffsetX = boardWrap.getLayoutX();
-        final double boardOffsetY = boardWrap.getLayoutY();
+        final double BOARD_OFFSET_X = boardWrap.getLayoutX();
+        final double BOARD_OFFSET_Y = boardWrap.getLayoutY();
 
-        double startingPointX = boardOffsetX + startingTile.getLayoutX() + startingTile.getWidth()/2;
-        double startingPointY = boardOffsetY + startingTile.getLayoutY() + startingTile.getHeight()/2;
-        double targetPointX = boardOffsetX + targetTile.getLayoutX() + targetTile.getWidth()/2;
-        double targetPointY = boardOffsetY + targetTile.getLayoutY() + targetTile.getHeight()/2;
+        double startingPointX = BOARD_OFFSET_X + startingTile.getLayoutX() + startingTile.getWidth()/2;
+        double startingPointY = BOARD_OFFSET_Y + startingTile.getLayoutY() + startingTile.getHeight()/2;
+        double targetPointX = BOARD_OFFSET_X + targetTile.getLayoutX() + targetTile.getWidth()/2;
+        double targetPointY = BOARD_OFFSET_Y + targetTile.getLayoutY() + targetTile.getHeight()/2;
 
         VBox movingBox = new VBox();
         movingBox.setId("transparentTile");
@@ -237,7 +237,7 @@ public class GameController {
         if(isEligibleForPromotion(candidate))
             promote(candidate);
     }
-    
+
     private void showPossibleMoves(int row, int col, List<Move> moves){
         for(Move m : moves){
             int destinationRow = m.destinationCoords.x;
