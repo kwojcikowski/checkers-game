@@ -155,7 +155,7 @@ public class GameController {
         transition.setNode(movingBox);
 
         transition.setOnFinished(e -> {
-            movingPiece.moveTo((BlackTile) board.getTiles()[targetRow][targetCol]);
+            movingPiece.moveTo(board.getTile(targetRow, targetCol));
 
             targetTile.getChildren().clear();
             targetTile.getChildren().add(pieceImage);

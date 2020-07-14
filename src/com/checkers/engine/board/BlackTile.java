@@ -41,6 +41,7 @@ public class BlackTile extends Tile {
         if(this.isOccupied()){
             var alternativePiece = occupant.clone();
             alternativeTile.setOccupant(alternativePiece);
+            alternativePiece.setOccupiedTile(alternativeTile);
         }
         return alternativeTile;
     }
