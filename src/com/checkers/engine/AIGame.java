@@ -81,14 +81,14 @@ public class AIGame extends Game {
 
     private void performRandomMove(Piece movedPiece, List<Move> consideredMoves){
         int randomIndex = randomGenerator.nextInt(consideredMoves.size());
-        controller.movePiece(movedPiece.coords, consideredMoves.get(randomIndex));
+        controller.movePiece(movedPiece.getCoords(), consideredMoves.get(randomIndex));
     }
 
     public void performRandomAttackingMove(Piece piece){
         List<Move> consideredMoves = piece.checkForPossibleMoves(getBoard(), false, false);
         if(!consideredMoves.isEmpty()) {
             int randomIndex = randomGenerator.nextInt(consideredMoves.size());
-            controller.movePiece(piece.coords, consideredMoves.get(randomIndex));
+            controller.movePiece(piece.getCoords(), consideredMoves.get(randomIndex));
         }
     }
 
