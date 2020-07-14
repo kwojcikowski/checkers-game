@@ -152,7 +152,6 @@ public class GameController {
         transition.setByY(targetPointY - startingPointY);
         transition.setDuration(Duration.seconds(0.5));
         transition.setNode(movingBox);
-
         transition.setOnFinished(e -> {
             movingPiece.moveTo(board.getTiles()[targetRow][targetCol]);
 
@@ -163,47 +162,44 @@ public class GameController {
             piecesImages[targetRow][targetCol] = pieceImage;
             piecesImages[oldRow][oldCol] = null;
 
-            if(moveToMake instanceof CapturingMove){
-                CapturingMove move = (CapturingMove)moveToMake;
-                Coords coords = move.getAttackedPieceCoords();
-                int attackedPieceRow = coords.x;
-                int attackedPieceCol = coords.y;
-                Piece attackedPiece = board.getTiles()[attackedPieceRow][attackedPieceCol].getOccupant();
+            if(moveToMake.isAttacking()){
+                CapturingMove move = (CapturingMove) moveToMake;
+                Coords attackedPieceCoords = move.getAttackedPieceCoords();
+                Piece attackedPiece = board.getTiles()[attackedPieceCoords.x][attackedPieceCoords.y].getOccupant();
+
                 attackedPiece.takeDown();
-                takeDownPiece(attackedPieceRow, attackedPieceCol);
-                List<Move> furtherMoves = getFurtherMoves(movingPiece);
-                removeHighlighting();
+                takeDownPiece(attackedPieceCoords);
+                removeTilesHighlighting();
+
+                List<Move> furtherMoves = getFollowingMoves(movingPiece);
                 if(furtherMoves.isEmpty()){
-                    if(canBePromoted(movingPiece))
-                        promote(movingPiece);
+                    checkForPromotion(movingPiece);
                     game.nextTurn();
                     resetMoveInteractions();
                 }else {
                     if(game instanceof AIGame && game.getTurn() == Alliance.BLACK) {
                         ((AIGame) game).performRandomAttackingMove(movingPiece);
                     }else {
-                        displayMoves(targetRow, targetCol, furtherMoves);
+                        showPossibleMoves(targetRow, targetCol, furtherMoves);
                     }
                 }
             }else {
-                if(canBePromoted(movingPiece))
-                    promote(movingPiece);
+                checkForPromotion(movingPiece);
                 game.nextTurn();
                 resetMoveInteractions();
             }
             if(game.isEndOfGame())
                 endGame();
         });
-
         transition.play();
     }
 
-    private void takeDownPiece(int row, int col){
+    private void takeDownPiece(Coords pieceCoords){
         if(game.getTurn() == Alliance.WHITE)
-            opponentTaken.add(piecesImages[row][col], 0, opponentTakenCounter++);
+            opponentTaken.add(piecesImages[pieceCoords.x][pieceCoords.y], 0, opponentTakenCounter++);
         else
-            playerTaken.add(piecesImages[row][col], 0, playerTakenCounter++);
-        boardLayout[row][col].getChildren().clear();
+            playerTaken.add(piecesImages[pieceCoords.x][pieceCoords.y], 0, playerTakenCounter++);
+        boardLayout[pieceCoords.x][pieceCoords.y].getChildren().clear();
     }
 
     private void checkForAvailableMoves(int row, int col){
@@ -226,7 +222,7 @@ public class GameController {
         }
     }
 
-    private List<Move> getFurtherMoves(Piece investigatedPiece){
+    private List<Move> getFollowingMoves(Piece investigatedPiece){
         disableAllInteractions();
         List<Move> allMoves = investigatedPiece.checkForPossibleMoves(board, true);
         List<Move> availableMoves = new LinkedList<>();
@@ -235,8 +231,13 @@ public class GameController {
                 availableMoves.add(move);
         return availableMoves;
     }
+
+    private void checkForPromotion(Piece candidate){
+        if(isEligibleForPromotion(candidate))
+            promote(candidate);
+    }
     
-    private void displayMoves(int row, int col, List<Move> moves){
+    private void showPossibleMoves(int row, int col, List<Move> moves){
         for(Move m : moves){
             int destinationRow = m.destinationCoords.x;
             int destinationColumn = m.destinationCoords.y;
@@ -255,7 +256,7 @@ public class GameController {
                 if(tile instanceof Tile.BlackTile) {
                     boardLayout[row][col].setId("blackTile");
                     if(tile.isOccupied() && (game.getTurn() == tile.getOccupant().getPieceAlliance()))
-                        makeFieldClickable(row, col);
+                        enableFieldInteraction(row, col);
                     else
                         disableField(row, col);
                 }
@@ -271,7 +272,7 @@ public class GameController {
         }
     }
 
-    private void removeHighlighting(){
+    private void removeTilesHighlighting(){
         for(int row = 0; row < BOARD_SIZE; row++){
             for(int col = 0; col < BOARD_SIZE; col++){
                 Tile tile  = board.getTiles()[row][col];
@@ -283,7 +284,7 @@ public class GameController {
         }
     }
 
-    private void makeFieldClickable(int row, int col){
+    private void enableFieldInteraction(int row, int col){
         boardLayout[row][col].setOnMouseClicked(e -> checkForAvailableMoves(row, col));
     }
 
@@ -291,14 +292,14 @@ public class GameController {
         boardLayout[row][col].setOnMouseClicked(e -> {});
     }
 
-    private boolean canBePromoted(Piece piece){
+    private boolean isEligibleForPromotion(Piece piece){
         if(piece instanceof Pawn){
             if(piece.getPieceAlliance() == Alliance.BLACK)
                 return piece.coords.x == BOARD_SIZE -1;
             else
                 return piece.coords.x == 0;
-        }else
-            return false;
+        }
+        return false;
     }
 
     private void promote(Piece piece){
@@ -311,21 +312,25 @@ public class GameController {
         else
             img = new Image("com/checkers/images/whiteKing.png");
         ImageView view = new ImageView(img);
+
         boardLayout[piece.coords.x][piece.coords.y].getChildren().add(view);
         piecesImages[piece.coords.x][piece.coords.y] = view;
     }
 
-    public void endGame(){
+    private void endGame(){
         disableAllInteractions();
+
         boardStackPane.setAlignment(Pos.CENTER);
         VBox messageContainer = new VBox();
         messageContainer.setId("gameEndBox");
         messageContainer.setAlignment(Pos.CENTER);
+
         Label gameOverLabel = new Label("Game Over!");
         gameOverLabel.setId("gameOverLabel");
-        String winnerString = game.getWinner().toString().charAt(0) + game.getWinner().toString().substring(1).toLowerCase();
+        String winnerString = game.getWinner();
         Label winner = new Label(winnerString + " player wins!");
         winner.setId("winnerLabel");
+
         Button playAgain = new Button("Play again");
         playAgain.setId("playAgainButton");
         boolean isAIGame = game instanceof AIGame;
