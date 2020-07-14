@@ -2,8 +2,6 @@ package com.checkers.engine.board;
 
 import com.checkers.engine.Alliance;
 import com.checkers.engine.pieces.*;
-import com.checkers.engine.board.Tile.*;
-
 
 public class Board {
 
@@ -41,7 +39,7 @@ public class Board {
                 if(isBlackTile(row, column))
                     tiles[row][column] = new BlackTile(Coords.at(row, column));
                 else
-                    tiles[row][column] = new WhiteTile(Coords.at(row, column));
+                    tiles[row][column] = WhiteTile.get();
             }
         }
     }
@@ -59,7 +57,7 @@ public class Board {
         for(int row=BOARD_SIZE-1;row >= BOARD_SIZE-ROWS_OF_PIECES;row--){
             for(int col=0;col<BOARD_SIZE;col++){
                 if(tiles[row][col] instanceof BlackTile) {
-                    tiles[row][col].setOccupant(new Pawn(Alliance.WHITE, tiles[row][col]));
+                    tiles[row][col].setOccupant(new Pawn(Alliance.WHITE, (BlackTile) tiles[row][col]));
                 }
             }
         }
@@ -69,7 +67,7 @@ public class Board {
         for(int row=0;row<ROWS_OF_PIECES;row++){
             for(int col=0;col<BOARD_SIZE;col++){
                 if(tiles[row][col] instanceof BlackTile) {
-                    tiles[row][col].setOccupant(new Pawn(Alliance.BLACK, tiles[row][col]));
+                    tiles[row][col].setOccupant(new Pawn(Alliance.BLACK, (BlackTile) tiles[row][col]));
                 }
             }
         }
@@ -77,6 +75,14 @@ public class Board {
 
     public Tile[][] getTiles() {
         return tiles;
+    }
+
+    public BlackTile getTile(int row, int col) {
+        Tile tile = tiles[row][col];
+        if(tile instanceof WhiteTile) {
+            throw new UnsupportedOperationException();
+        }
+        else return (BlackTile) tile;
     }
 
     //TODO clone? copy constructor?
