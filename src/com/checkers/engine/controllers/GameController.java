@@ -3,11 +3,12 @@ package com.checkers.engine.controllers;
 import com.checkers.engine.AIGame;
 import com.checkers.engine.Alliance;
 import com.checkers.engine.Game;
+import com.checkers.engine.board.BlackTile;
 import com.checkers.engine.board.Board;
 import com.checkers.engine.board.Coords;
+import com.checkers.engine.board.Tile;
 import com.checkers.engine.board.move.CapturingMove;
 import com.checkers.engine.board.move.Move;
-import com.checkers.engine.board.Tile;
 import com.checkers.engine.pieces.King;
 import com.checkers.engine.pieces.Pawn;
 import com.checkers.engine.pieces.Piece;
@@ -98,7 +99,7 @@ public class GameController {
     }
 
     private boolean isBlackTile(int row, int col){
-        return board.getTiles()[row][col] instanceof Tile.BlackTile;
+        return board.getTiles()[row][col] instanceof BlackTile;
     }
 
     private void setupWhitePawn(int row, int col){
@@ -129,13 +130,13 @@ public class GameController {
         VBox targetTile = boardLayout[targetRow][targetCol];
         Piece movingPiece = board.getTiles()[oldRow][oldCol].getOccupant();
 
-        final double boardOffsetX = boardWrap.getLayoutX();
-        final double boardOffsetY = boardWrap.getLayoutY();
+        final double BOARD_OFFSET_X = boardWrap.getLayoutX();
+        final double BOARD_OFFSET_Y = boardWrap.getLayoutY();
 
-        double startingPointX = boardOffsetX + startingTile.getLayoutX() + startingTile.getWidth()/2;
-        double startingPointY = boardOffsetY + startingTile.getLayoutY() + startingTile.getHeight()/2;
-        double targetPointX = boardOffsetX + targetTile.getLayoutX() + targetTile.getWidth()/2;
-        double targetPointY = boardOffsetY + targetTile.getLayoutY() + targetTile.getHeight()/2;
+        double startingPointX = BOARD_OFFSET_X + startingTile.getLayoutX() + startingTile.getWidth()/2;
+        double startingPointY = BOARD_OFFSET_Y + startingTile.getLayoutY() + startingTile.getHeight()/2;
+        double targetPointX = BOARD_OFFSET_X + targetTile.getLayoutX() + targetTile.getWidth()/2;
+        double targetPointY = BOARD_OFFSET_Y + targetTile.getLayoutY() + targetTile.getHeight()/2;
 
         VBox movingBox = new VBox();
         movingBox.setId("transparentTile");
@@ -152,9 +153,8 @@ public class GameController {
         transition.setByY(targetPointY - startingPointY);
         transition.setDuration(Duration.seconds(0.5));
         transition.setNode(movingBox);
-
         transition.setOnFinished(e -> {
-            movingPiece.moveTo(board.getTiles()[targetRow][targetCol]);
+            movingPiece.moveTo(board.getTile(targetRow, targetCol));
 
             targetTile.getChildren().clear();
             targetTile.getChildren().add(pieceImage);
@@ -163,52 +163,49 @@ public class GameController {
             piecesImages[targetRow][targetCol] = pieceImage;
             piecesImages[oldRow][oldCol] = null;
 
-            if(moveToMake instanceof CapturingMove){
-                CapturingMove move = (CapturingMove)moveToMake;
-                Coords coords = move.getAttackedPieceCoords();
-                int attackedPieceRow = coords.x;
-                int attackedPieceCol = coords.y;
-                Piece attackedPiece = board.getTiles()[attackedPieceRow][attackedPieceCol].getOccupant();
+            if(moveToMake.isAttacking()){
+                CapturingMove move = (CapturingMove) moveToMake;
+                Coords attackedPieceCoords = move.getAttackedPieceCoords();
+                Piece attackedPiece = board.getTiles()[attackedPieceCoords.x][attackedPieceCoords.y].getOccupant();
+
                 attackedPiece.takeDown();
-                takeDownPiece(attackedPieceRow, attackedPieceCol);
-                List<Move> furtherMoves = getFurtherMoves(movingPiece);
-                removeHighlighting();
+                takeDownPiece(attackedPieceCoords);
+                removeTilesHighlighting();
+
+                List<Move> furtherMoves = getFollowingMoves(movingPiece);
                 if(furtherMoves.isEmpty()){
-                    if(canBePromoted(movingPiece))
-                        promote(movingPiece);
+                    checkForPromotion(movingPiece);
                     game.nextTurn();
                     resetMoveInteractions();
                 }else {
                     if(game instanceof AIGame && game.getTurn() == Alliance.BLACK) {
                         ((AIGame) game).performRandomAttackingMove(movingPiece);
                     }else {
-                        displayMoves(targetRow, targetCol, furtherMoves);
+                        showPossibleMoves(targetRow, targetCol, furtherMoves);
                     }
                 }
             }else {
-                if(canBePromoted(movingPiece))
-                    promote(movingPiece);
+                checkForPromotion(movingPiece);
                 game.nextTurn();
                 resetMoveInteractions();
             }
             if(game.isEndOfGame())
                 endGame();
         });
-
         transition.play();
     }
 
-    private void takeDownPiece(int row, int col){
+    private void takeDownPiece(Coords pieceCoords){
         if(game.getTurn() == Alliance.WHITE)
-            opponentTaken.add(piecesImages[row][col], 0, opponentTakenCounter++);
+            opponentTaken.add(piecesImages[pieceCoords.x][pieceCoords.y], 0, opponentTakenCounter++);
         else
-            playerTaken.add(piecesImages[row][col], 0, playerTakenCounter++);
-        boardLayout[row][col].getChildren().clear();
+            playerTaken.add(piecesImages[pieceCoords.x][pieceCoords.y], 0, playerTakenCounter++);
+        boardLayout[pieceCoords.x][pieceCoords.y].getChildren().clear();
     }
 
     private void checkForAvailableMoves(int row, int col){
         resetMoveInteractions();
-        Tile investigatedTile = board.getTiles()[row][col];
+        BlackTile investigatedTile = board.getTile(row, col);
         Piece investigatedPiece = investigatedTile.getOccupant();
         List<Move> list = investigatedPiece.checkForPossibleMoves(board, true);
         for(Move m : list){
@@ -216,7 +213,7 @@ public class GameController {
             int destinationColumn = m.destinationCoords.y;
             if(m.isAvailableNow()) {
                 boardLayout[destinationRow][destinationColumn].setOnMouseClicked(e ->
-                        movePiece(investigatedTile.coords, m));
+                        movePiece(investigatedTile.getCoords(), m));
                 if (m.isAttacking())
                     boardLayout[destinationRow][destinationColumn].setId("isAttacking");
                 else
@@ -226,7 +223,7 @@ public class GameController {
         }
     }
 
-    private List<Move> getFurtherMoves(Piece investigatedPiece){
+    private List<Move> getFollowingMoves(Piece investigatedPiece){
         disableAllInteractions();
         List<Move> allMoves = investigatedPiece.checkForPossibleMoves(board, true);
         List<Move> availableMoves = new LinkedList<>();
@@ -235,14 +232,19 @@ public class GameController {
                 availableMoves.add(move);
         return availableMoves;
     }
-    
-    private void displayMoves(int row, int col, List<Move> moves){
+
+    private void checkForPromotion(Piece candidate){
+        if(isEligibleForPromotion(candidate))
+            promote(candidate);
+    }
+
+    private void showPossibleMoves(int row, int col, List<Move> moves){
         for(Move m : moves){
             int destinationRow = m.destinationCoords.x;
             int destinationColumn = m.destinationCoords.y;
             if (m.isAvailableNow() && m.isAttacking()) {
                 boardLayout[destinationRow][destinationColumn].setOnMouseClicked(e ->
-                        movePiece(board.getTiles()[row][col].coords, m));
+                        movePiece(board.getTiles()[row][col].getOccupant().getCoords(), m));
                 boardLayout[destinationRow][destinationColumn].setId("isAttacking");
             }
         }
@@ -252,10 +254,10 @@ public class GameController {
         for(int row = 0; row < BOARD_SIZE; row++){
             for(int col = 0; col < BOARD_SIZE; col++){
                 Tile tile  = board.getTiles()[row][col];
-                if(tile instanceof Tile.BlackTile) {
+                if(tile instanceof BlackTile) {
                     boardLayout[row][col].setId("blackTile");
                     if(tile.isOccupied() && (game.getTurn() == tile.getOccupant().getPieceAlliance()))
-                        makeFieldClickable(row, col);
+                        enableFieldInteraction(row, col);
                     else
                         disableField(row, col);
                 }
@@ -271,11 +273,11 @@ public class GameController {
         }
     }
 
-    private void removeHighlighting(){
+    private void removeTilesHighlighting(){
         for(int row = 0; row < BOARD_SIZE; row++){
             for(int col = 0; col < BOARD_SIZE; col++){
                 Tile tile  = board.getTiles()[row][col];
-                if(tile instanceof Tile.BlackTile)
+                if(tile instanceof BlackTile)
                     boardLayout[row][col].setId("blackTile");
                 else
                     boardLayout[row][col].setId("whiteTile");
@@ -283,7 +285,7 @@ public class GameController {
         }
     }
 
-    private void makeFieldClickable(int row, int col){
+    private void enableFieldInteraction(int row, int col){
         boardLayout[row][col].setOnMouseClicked(e -> checkForAvailableMoves(row, col));
     }
 
@@ -291,41 +293,44 @@ public class GameController {
         boardLayout[row][col].setOnMouseClicked(e -> {});
     }
 
-    private boolean canBePromoted(Piece piece){
+    private boolean isEligibleForPromotion(Piece piece){
         if(piece instanceof Pawn){
             if(piece.getPieceAlliance() == Alliance.BLACK)
-                return piece.coords.x == BOARD_SIZE -1;
+                return piece.getCoords().x == BOARD_SIZE -1;
             else
-                return piece.coords.x == 0;
+                return piece.getCoords().x == 0;
         }else
             return false;
     }
 
     private void promote(Piece piece){
-        piece = King.from((Pawn) piece);
+        piece = King.promoteFrom((Pawn) piece);
 
-        boardLayout[piece.coords.x][piece.coords.y].getChildren().clear();
+        boardLayout[piece.getCoords().x][piece.getCoords().y].getChildren().clear();
         Image img;
         if(piece.getPieceAlliance() == Alliance.BLACK)
             img = new Image("com/checkers/images/blackKing.png");
         else
             img = new Image("com/checkers/images/whiteKing.png");
         ImageView view = new ImageView(img);
-        boardLayout[piece.coords.x][piece.coords.y].getChildren().add(view);
-        piecesImages[piece.coords.x][piece.coords.y] = view;
+        boardLayout[piece.getCoords().x][piece.getCoords().y].getChildren().add(view);
+        piecesImages[piece.getCoords().x][piece.getCoords().y] = view;
     }
 
-    public void endGame(){
+    private void endGame(){
         disableAllInteractions();
+
         boardStackPane.setAlignment(Pos.CENTER);
         VBox messageContainer = new VBox();
         messageContainer.setId("gameEndBox");
         messageContainer.setAlignment(Pos.CENTER);
+
         Label gameOverLabel = new Label("Game Over!");
         gameOverLabel.setId("gameOverLabel");
-        String winnerString = game.getWinner().toString().charAt(0) + game.getWinner().toString().substring(1).toLowerCase();
+        String winnerString = game.getWinner();
         Label winner = new Label(winnerString + " player wins!");
         winner.setId("winnerLabel");
+
         Button playAgain = new Button("Play again");
         playAgain.setId("playAgainButton");
         boolean isAIGame = game instanceof AIGame;

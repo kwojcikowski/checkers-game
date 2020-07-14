@@ -48,7 +48,7 @@ public class Game {
         return true;
     }
 
-    public Alliance getWinner(){
-        return (turn == Alliance.WHITE) ? Alliance.BLACK : Alliance.WHITE;
+    public String getWinner(){
+        return (turn == Alliance.WHITE) ? "Black" : "White";
     }
 }

@@ -4,14 +4,18 @@ import com.checkers.engine.board.Coords;
 
 public class CapturingMove extends Move{
 
-    private Coords attackedPieceCoords;
+    private final Coords attackedPieceCoords;
 
-    private CapturingMove(Coords destinationCoords, boolean isAvailableNow, Coords attackedPieceCoords) {
+    private CapturingMove(Coords destinationCoords,
+                          boolean isAvailableNow,
+                          Coords attackedPieceCoords) {
         super(destinationCoords, isAvailableNow);
         this.attackedPieceCoords = attackedPieceCoords;
     }
 
-    public static Move to(final Coords destination, final boolean isAvailableNow, final Coords attackedPieceCoords){
+    public static Move to(Coords destination,
+                          boolean isAvailableNow,
+                          Coords attackedPieceCoords){
         return new CapturingMove(destination, isAvailableNow, attackedPieceCoords);
     }
 

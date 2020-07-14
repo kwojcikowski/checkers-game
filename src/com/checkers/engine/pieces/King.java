@@ -1,5 +1,6 @@
 package com.checkers.engine.pieces;
 
+import com.checkers.engine.board.BlackTile;
 import com.checkers.engine.board.Board;
 import com.checkers.engine.board.Coords;
 import com.checkers.engine.board.move.Move;
@@ -12,22 +13,25 @@ import com.checkers.engine.board.Tile;
 
 public class King extends Piece{
 
-    public King(final Alliance alliance, Tile occupiedTile){
+    private King(final Alliance alliance, BlackTile occupiedTile){
         super(alliance, occupiedTile);
     }
 
-    public static King from(final Pawn pawn) {
-        King king = new King(pawn.pieceAlliance, pawn.getOccupied());
-        pawn.getOccupied().setOccupant(king);
+    public static King promoteFrom(Pawn pawn) {
+        var king = new King(pawn.getPieceAlliance(), pawn.getOccupiedTile());
+        pawn.getOccupiedTile().setOccupant(king);
         return king;
     }
 
     @Override
-    public List<Move> checkForPossibleMoves(final Board board, final boolean isAvailableDirectly, final boolean recursive) {
+    public List<Move> checkForPossibleMoves(Board board,
+                                            boolean isAvailableDirectly,
+                                            boolean recursive) {
         List<Move> moves = new LinkedList<>();
         Tile[][] tiles = board.getTiles();
         for(int horizontalShift = -1; horizontalShift < 2; horizontalShift += 2){
             for(int verticalShift = -1; verticalShift < 2; verticalShift += 2){
+                var coords = getCoords();
                 int x = coords.x + horizontalShift;
                 int y = coords.y + verticalShift;
                 try{
@@ -37,15 +41,14 @@ public class King extends Piece{
                         x += horizontalShift;
                         y += verticalShift;
                     }
-                    Tile tileToJumpOver = tiles[x][y];
+                    BlackTile tileToJumpOver = (BlackTile) tiles[x][y];
                     if(tileToJumpOver.isOccupied() && areEnemies(tileToJumpOver.getOccupant())){
                         x += horizontalShift;
                         y += verticalShift;
                         while(tiles[x][y].isFree()){
                             moves.add(
                                     CapturingMove.to(Coords.at(x, y),
-                                            true, tileToJumpOver.coords)
-                            );
+                                            true, tileToJumpOver.getCoords()));
                             x += horizontalShift;
                             y += verticalShift;
                             //TODO recursive call
@@ -55,6 +58,11 @@ public class King extends Piece{
             }
         }
         return moves;
+    }
+
+    @Override
+    public King clone() throws CloneNotSupportedException {
+        return new King(pieceAlliance, occupiedTile);
     }
 
 }

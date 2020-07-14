@@ -1,54 +1,65 @@
 package com.checkers.engine.pieces;
 
 import com.checkers.engine.Alliance;
+import com.checkers.engine.board.BlackTile;
 import com.checkers.engine.board.Board;
 import com.checkers.engine.board.Coords;
 import com.checkers.engine.board.move.Move;
-import com.checkers.engine.board.Tile;
 
 import java.util.List;
 
 public abstract class Piece {
 
-    public Coords coords;
-    final Alliance pieceAlliance;
-    private Tile occupiedTile;
+    protected final Alliance pieceAlliance;
+    protected BlackTile occupiedTile;
 
-    public Tile getOccupied() {
+    Piece(Alliance pieceAlliance, BlackTile occupiedTile){
+        this.pieceAlliance=pieceAlliance;
+        this.occupiedTile = occupiedTile;
+    }
+
+    final public Alliance getPieceAlliance() {
+        return pieceAlliance;
+    }
+
+    final public BlackTile getOccupiedTile() {
         return occupiedTile;
     }
 
-    Piece(final Alliance alliance, Tile occupiedTile){
-        pieceAlliance=alliance;
+    final public void setOccupiedTile(BlackTile occupiedTile) {
         this.occupiedTile = occupiedTile;
-        coords = occupiedTile.coords;
+    }
+
+    final public Coords getCoords(){
+        return this.occupiedTile.getCoords();
     }
 
     final public boolean areEnemies(Piece other){
         return this.pieceAlliance!=other.pieceAlliance;
     }
 
-    public Alliance getPieceAlliance(){
-        return pieceAlliance;
-    }
-
-    public void moveTo(final Tile destination){
+    public void moveTo(BlackTile destination){
         occupiedTile.freeUp();
         occupiedTile = destination;
         occupiedTile.setOccupant(this);
-        coords = occupiedTile.coords;
     }
 
     public void takeDown(){
         occupiedTile.freeUp();
         occupiedTile = null;
+        //TODO cemetery?
     }
 
-    public abstract List<Move> checkForPossibleMoves(final Board board,
-                                                     final boolean isAvailableDirectly, final boolean recursive);
+    public abstract List<Move> checkForPossibleMoves(Board board,
+                                                     boolean isAvailableDirectly,
+                                                     boolean recursive);
 
-    public List<Move> checkForPossibleMoves(final Board board, final boolean isAvailableDirectly) {
+    public List<Move> checkForPossibleMoves(Board board,
+                                            boolean isAvailableDirectly) {
         return checkForPossibleMoves(board, isAvailableDirectly, true);
     }
+
+    @Override
+    public abstract Piece clone() throws CloneNotSupportedException;
 
 }
