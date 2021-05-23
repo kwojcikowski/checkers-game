@@ -17,6 +17,11 @@ public class King extends Piece{
         super(alliance, occupiedTile);
     }
 
+    @Override
+    public List<Move> getAllPossibleMoves(Board board) throws CloneNotSupportedException {
+        return null;
+    }
+
     public static King promoteFrom(Pawn pawn) {
         var king = new King(pawn.getPieceAlliance(), pawn.getOccupiedTile());
         pawn.getOccupiedTile().setOccupant(king);
@@ -36,8 +41,8 @@ public class King extends Piece{
                 int y = coords.y + verticalShift;
                 try{
                     while(tiles[x][y].isFree()){
-                        if (isAvailableDirectly)
-                            moves.add(Move.to(Coords.at(x, y), true));
+//                        if (isAvailableDirectly)
+//                            moves.add(Move.to(Coords.at(x, y), true));
                         x += horizontalShift;
                         y += verticalShift;
                     }
@@ -46,9 +51,9 @@ public class King extends Piece{
                         x += horizontalShift;
                         y += verticalShift;
                         while(tiles[x][y].isFree()){
-                            moves.add(
-                                    CapturingMove.to(Coords.at(x, y),
-                                            true, tileToJumpOver.getCoords()));
+//                            moves.add(
+//                                    CapturingMove.to(Coords.at(x, y),
+//                                            true, tileToJumpOver.getCoords()));
                             x += horizontalShift;
                             y += verticalShift;
                             //TODO recursive call

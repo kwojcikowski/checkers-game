@@ -13,7 +13,17 @@ public class Board {
     public Board(){
         tiles = new Tile[BOARD_SIZE][BOARD_SIZE];
         setupTiles();
-        setupBoard();
+//        setupBoard();
+
+        tiles[3][1].setOccupant(new Pawn(Alliance.BLACK, (BlackTile) tiles[3][1]));
+        tiles[3][3].setOccupant(new Pawn(Alliance.BLACK, (BlackTile) tiles[3][3]));
+        tiles[5][3].setOccupant(new Pawn(Alliance.BLACK, (BlackTile) tiles[5][3]));
+        tiles[1][5].setOccupant(new Pawn(Alliance.BLACK, (BlackTile) tiles[1][5]));
+        tiles[1][3].setOccupant(new Pawn(Alliance.BLACK, (BlackTile) tiles[1][3]));
+        tiles[3][5].setOccupant(new Pawn(Alliance.BLACK, (BlackTile) tiles[3][5]));
+        tiles[5][5].setOccupant(new Pawn(Alliance.BLACK, (BlackTile) tiles[5][5]));
+
+        tiles[6][4].setOccupant(new Pawn(Alliance.WHITE, (BlackTile) tiles[6][4]));
     }
 
     private Board(Board other){

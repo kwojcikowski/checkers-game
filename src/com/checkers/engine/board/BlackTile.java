@@ -37,7 +37,7 @@ public class BlackTile extends Tile {
 
     @Override
     protected BlackTile clone() throws CloneNotSupportedException {
-        BlackTile alternativeTile = new BlackTile(this.coords);
+        BlackTile alternativeTile = new BlackTile(Coords.at(this.coords.x, this.coords.y));
         if(this.isOccupied()){
             var alternativePiece = occupant.clone();
             alternativeTile.setOccupant(alternativePiece);

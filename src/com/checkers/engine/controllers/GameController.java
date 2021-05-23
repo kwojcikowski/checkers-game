@@ -71,11 +71,12 @@ public class GameController {
     }
 
     private void renderBoard(){
+        Tile[][] tiles = game.getBoard().getTiles();
         boardGrid.getChildren().clear();
         for (int row = 0; row < boardGrid.getRowCount(); row++) {
             for (int column = 0; column < boardGrid.getColumnCount(); column++) {
                 renderTile(row, column);
-                setupPawn(row, column);
+                setupPawn(tiles[row][column]);
             }
         }
     }
@@ -88,14 +89,31 @@ public class GameController {
         else
             boardField.setId("whiteTile");
         boardGrid.add(boardField, column, row);
+        boardField.getChildren().add(new Label("(" + row + ", " + column + ")"));
         boardLayout[row][column] = boardField;
     }
 
-    private void setupPawn(int row, int column){
-        if(isBlackTile(row, column) && row < ROWS_OF_PIECES)
-            setupBlackPawn(row, column);
-        else if (isBlackTile(row, column) && row >= BOARD_SIZE - ROWS_OF_PIECES)
-            setupWhitePawn(row, column);
+//    private void setupPawn(int row, int column){
+//        if(isBlackTile(row, column) && row < ROWS_OF_PIECES)
+//            setupBlackPawn(row, column);
+//        else if (isBlackTile(row, column) && row >= BOARD_SIZE - ROWS_OF_PIECES)
+//            setupWhitePawn(row, column);
+//    }
+
+    private void setupPawn(Tile tile){
+        if(tile.isOccupied()){
+            Piece occupant = tile.getOccupant();
+            if(occupant.getPieceAlliance() == Alliance.BLACK)
+                setupBlackPawn(occupant.getCoords().x, occupant.getCoords().y);
+            else
+                setupWhitePawn(occupant.getCoords().x, occupant.getCoords().y);
+        }
+//            if(.getPieceAlliance() == Alliance.BLACK)
+//                setupBlackPawn(tile.);
+//        if(isBlackTile(row, column) && row < ROWS_OF_PIECES)
+//            setupBlackPawn(row, column);
+//        else if (isBlackTile(row, column) && row >= BOARD_SIZE - ROWS_OF_PIECES)
+//            setupWhitePawn(row, column);
     }
 
     private boolean isBlackTile(int row, int col){
@@ -163,7 +181,7 @@ public class GameController {
             piecesImages[targetRow][targetCol] = pieceImage;
             piecesImages[oldRow][oldCol] = null;
 
-            if(moveToMake.isAttacking()){
+            if(moveToMake.isCapturing()){
                 CapturingMove move = (CapturingMove) moveToMake;
                 Coords attackedPieceCoords = move.getAttackedPieceCoords();
                 Piece attackedPiece = board.getTiles()[attackedPieceCoords.x][attackedPieceCoords.y].getOccupant();
@@ -207,14 +225,21 @@ public class GameController {
         resetMoveInteractions();
         BlackTile investigatedTile = board.getTile(row, col);
         Piece investigatedPiece = investigatedTile.getOccupant();
-        List<Move> list = investigatedPiece.checkForPossibleMoves(board, true);
+        List<Move> list = null;
+        try {
+            list = investigatedPiece.getAllPossibleMoves(board);
+            System.out.println("list = " + list);
+        } catch (CloneNotSupportedException e) {
+            System.out.println("DUPA");
+        }
+//        List<Move> list = investigatedPiece.checkForPossibleMoves(board, true);
         for(Move m : list){
             int destinationRow = m.destinationCoords.x;
             int destinationColumn = m.destinationCoords.y;
             if(m.isAvailableNow()) {
                 boardLayout[destinationRow][destinationColumn].setOnMouseClicked(e ->
                         movePiece(investigatedTile.getCoords(), m));
-                if (m.isAttacking())
+                if (m.isCapturing())
                     boardLayout[destinationRow][destinationColumn].setId("isAttacking");
                 else
                     boardLayout[destinationRow][destinationColumn].setId("isAvailable");
@@ -242,7 +267,7 @@ public class GameController {
         for(Move m : moves){
             int destinationRow = m.destinationCoords.x;
             int destinationColumn = m.destinationCoords.y;
-            if (m.isAvailableNow() && m.isAttacking()) {
+            if (m.isAvailableNow() && m.isCapturing()) {
                 boardLayout[destinationRow][destinationColumn].setOnMouseClicked(e ->
                         movePiece(board.getTiles()[row][col].getOccupant().getCoords(), m));
                 boardLayout[destinationRow][destinationColumn].setId("isAttacking");

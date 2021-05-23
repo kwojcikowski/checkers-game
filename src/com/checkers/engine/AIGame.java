@@ -95,7 +95,7 @@ public class AIGame extends Game {
     private List<Move> extractAttackingMoves(List<Move> moves){
         List<Move> attackingMoves = new LinkedList<>();
         for(Move move : moves)
-            if(move.isAttacking())
+            if(move.isCapturing())
                 attackingMoves.add(move);
         return attackingMoves;
     }

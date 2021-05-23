@@ -50,6 +50,8 @@ public abstract class Piece {
         //TODO cemetery?
     }
 
+    public abstract List<Move> getAllPossibleMoves(Board board) throws CloneNotSupportedException;
+
     public abstract List<Move> checkForPossibleMoves(Board board,
                                                      boolean isAvailableDirectly,
                                                      boolean recursive);
