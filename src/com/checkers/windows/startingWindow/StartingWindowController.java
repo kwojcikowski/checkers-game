@@ -1,5 +1,6 @@
 package com.checkers.windows.startingWindow;
 
+import com.checkers.engine.GameType;
 import com.checkers.windows.gameWindow.GameWindow;
 import javafx.stage.Stage;
 
@@ -8,17 +9,21 @@ public class StartingWindowController {
     private Stage currentStage;
 
     public void runMultiplayerGame() {
-        launchGameScene(true);
+        launchGameScene(GameType.PLAYER_TO_PLAYER);
     }
 
     public void runAIGame(){
-        launchGameScene(false);
+        launchGameScene(GameType.PLAYER_TO_AI);
     }
 
-    private void launchGameScene(boolean isMultiplayer){
+    public void runDoubleAIGame(){
+        launchGameScene(GameType.AI_TO_AI);
+    }
+
+    private void launchGameScene(GameType gameType){
         GameWindow gameWindow = new GameWindow();
         gameWindow.setStageToHide(currentStage);
-        gameWindow.setIsMultiplayer(isMultiplayer);
+        gameWindow.setGameType(gameType);
         try {
             gameWindow.start(new Stage());
         } catch (Exception e) {

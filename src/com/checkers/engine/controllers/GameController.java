@@ -3,6 +3,7 @@ package com.checkers.engine.controllers;
 import com.checkers.engine.AIGame;
 import com.checkers.engine.Alliance;
 import com.checkers.engine.Game;
+import com.checkers.engine.GameType;
 import com.checkers.engine.board.BlackTile;
 import com.checkers.engine.board.Board;
 import com.checkers.engine.board.Coords;
@@ -13,8 +14,8 @@ import com.checkers.engine.pieces.King;
 import com.checkers.engine.pieces.Pawn;
 import com.checkers.engine.pieces.Piece;
 import com.checkers.engine.player.AIPlayer;
+import com.checkers.engine.player.HumanPlayer;
 import com.checkers.engine.player.strategy.RandomFirstAttackStrategy;
-import com.checkers.engine.player.strategy.RandomStrategy;
 import javafx.animation.TranslateTransition;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
@@ -29,7 +30,6 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 
-import java.util.LinkedList;
 import java.util.List;
 
 import static com.checkers.engine.board.Board.BOARD_SIZE;
@@ -51,6 +51,7 @@ public class GameController {
 
     private Game game;
     private Board board;
+    private GameType gameType;
     private VBox[][] boardLayout;
     private ImageView[][] piecesImages;
 
@@ -62,7 +63,7 @@ public class GameController {
         boardLayout = new VBox[BOARD_SIZE][BOARD_SIZE];
         piecesImages = new ImageView[BOARD_SIZE][BOARD_SIZE];
 
-        game = new Game(null, null);
+        game = new Game();
         board = game.getBoard();
         renderBoard();
 
@@ -70,15 +71,26 @@ public class GameController {
         opponentTakenCounter = 0;
         opponentTaken.getChildren().clear();
         playerTaken.getChildren().clear();
-
-        resetMoveInteractions();
     }
 
-    public void evolveIntoAIGame() {
-        game = new AIGame(game, this);
+    public void startTwoPlayersGame() {
+        game.whitePlayer = new HumanPlayer(Alliance.WHITE, this);
+        game.blackPlayer = new HumanPlayer(Alliance.BLACK, this);
+        gameType = GameType.PLAYER_TO_PLAYER;
+        game.alternateTurn();
+    }
+
+    public void startPlayerAIGame() {
+        game.whitePlayer = new HumanPlayer(Alliance.WHITE, this);
+        game.blackPlayer = new AIPlayer(Alliance.BLACK, new RandomFirstAttackStrategy(), this);
+        gameType = GameType.PLAYER_TO_AI;
+        game.alternateTurn();
+    }
+
+    public void startDoubleAIGame() {
         game.whitePlayer = new AIPlayer(Alliance.WHITE, new RandomFirstAttackStrategy(), this);
         game.blackPlayer = new AIPlayer(Alliance.BLACK, new RandomFirstAttackStrategy(), this);
-
+        gameType = GameType.AI_TO_AI;
         game.alternateTurn();
     }
 
@@ -171,7 +183,7 @@ public class GameController {
         game.alternateTurn();
     }
 
-    public void movePiece(Move moveToMake) {
+    public void movePiece(Move moveToMake, boolean isHumanTriggered) {
         disableAllInteractions();
         Coords pieceCoords = moveToMake.piece.getCoords();
         int oldRow = pieceCoords.x;
@@ -218,14 +230,21 @@ public class GameController {
                 removeTilesHighlighting();
             }
             checkForPromotion(movingPiece);
-            //recursive call
             if (moveToMake.hasNextMove()) {
-                movePiece(((CapturingMove) moveToMake).getNextMove());
+                movePiece(((CapturingMove) moveToMake).getNextMove(), false);
             } else {
                 if (game.isEndOfGame()) {
                     endGame();
                 }
-                game.alternateTurn();
+
+                List<Move> possibleFurtherMoves = movingPiece.checkForPossibleMoves(game.getBoard(), false, false);
+                if(moveToMake.isCapturing() && isHumanTriggered && !possibleFurtherMoves.isEmpty()) {
+                    disableAllInteractions();
+                    removeTilesHighlighting();
+                    showFurtherMoves(possibleFurtherMoves);
+                } else {
+                    game.alternateTurn();
+                }
             }
         });
         transition.play();
@@ -240,16 +259,16 @@ public class GameController {
     }
 
     private void checkForAvailableMoves(int row, int col) {
-        resetMoveInteractions();
+        resetMoveInteractions(game.getActivePlayer().alliance);
         BlackTile investigatedTile = board.getTile(row, col);
         Piece investigatedPiece = investigatedTile.getOccupant();
-        List<Move> list = investigatedPiece.getAllPossibleMoves(board);
+        List<Move> list = investigatedPiece.checkForPossibleMoves(board, true, false);
         for (Move m : list) {
             int destinationRow = m.destinationCoords.x;
             int destinationColumn = m.destinationCoords.y;
             if (m.isAvailableNow()) {
                 boardLayout[destinationRow][destinationColumn].setOnMouseClicked(e ->
-                        movePiece(m));
+                        movePiece(m, true));
                 if (m.isCapturing())
                     boardLayout[destinationRow][destinationColumn].setId("isAttacking");
                 else
@@ -259,44 +278,30 @@ public class GameController {
         }
     }
 
-    public void enablePieceInteraction() {
-
-    }
-
-    private List<Move> getFollowingMoves(Piece investigatedPiece) {
-        disableAllInteractions();
-        List<Move> allMoves = investigatedPiece.checkForPossibleMoves(board, true);
-        List<Move> availableMoves = new LinkedList<>();
-        for (Move move : allMoves)
-            if (move instanceof CapturingMove)
-                availableMoves.add(move);
-        return availableMoves;
-    }
-
     private void checkForPromotion(Piece candidate) {
         if (isEligibleForPromotion(candidate))
             promote(candidate);
     }
 
-    private void showPossibleMoves(int row, int col, List<Move> moves) {
+    private void showFurtherMoves(List<Move> moves) {
         for (Move m : moves) {
             int destinationRow = m.destinationCoords.x;
             int destinationColumn = m.destinationCoords.y;
-            if (m.isAvailableNow() && m.isCapturing()) {
+            if (m.isCapturing()) {
                 boardLayout[destinationRow][destinationColumn].setOnMouseClicked(e ->
-                        movePiece(m));
+                        movePiece(m, true));
                 boardLayout[destinationRow][destinationColumn].setId("isAttacking");
             }
         }
     }
 
-    public void resetMoveInteractions() {
+    public void resetMoveInteractions(Alliance alliance) {
         for (int row = 0; row < BOARD_SIZE; row++) {
             for (int col = 0; col < BOARD_SIZE; col++) {
                 Tile tile = board.getTiles()[row][col];
                 if (tile instanceof BlackTile) {
                     boardLayout[row][col].setId("blackTile");
-                    if (tile.isOccupied() && (game.getTurn() == tile.getOccupant().getPieceAlliance()))
+                    if (tile.isOccupied() && tile.getOccupant().getPieceAlliance() == alliance)
                         enableFieldInteraction(row, col);
                     else
                         disableField(row, col);
@@ -384,8 +389,17 @@ public class GameController {
             boardStackPane.setAlignment(Pos.TOP_LEFT);
             boardStackPane.getChildren().remove(messageContainer);
             initialize();
-            if (isAIGame)
-                evolveIntoAIGame();
+            switch (gameType) {
+                case PLAYER_TO_PLAYER:
+                    startTwoPlayersGame();
+                    break;
+                case PLAYER_TO_AI:
+                    startPlayerAIGame();
+                    break;
+                case AI_TO_AI:
+                    startDoubleAIGame();
+                    break;
+            }
         });
 
         messageContainer.getChildren().addAll(gameOverLabel, winner, playAgain);

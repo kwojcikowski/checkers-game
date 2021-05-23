@@ -24,7 +24,6 @@ public class Board {
         setupTiles();
         setupBoard();
 
-
 //        setupPawn(Alliance.WHITE, 2, 2);
 //        setupPawn(Alliance.BLACK, 1, 3);
 //        setupPawn(Alliance.BLACK, 2, 6);
@@ -62,7 +61,6 @@ public class Board {
                 try {
                     tiles[row][col] = other.getTiles()[row][col].clone();
                 } catch (CloneNotSupportedException e) {
-                    System.out.println("Could not clone object");
                 }
             }
         }

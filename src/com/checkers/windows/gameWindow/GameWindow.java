@@ -1,5 +1,6 @@
 package com.checkers.windows.gameWindow;
 
+import com.checkers.engine.GameType;
 import com.checkers.engine.controllers.GameController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -12,10 +13,8 @@ public class GameWindow extends Application {
     private static final int WIDTH = 800, HEIGHT = 600;
     private static final String FXML_PATH = "GameWindow.fxml";
     private static final String STYLE_PATH = "GameWindowStyle.css";
-    private boolean isMultiplayer;
+    private GameType gameType;
     private Stage stageToHide;
-
-    //int 1 - multiplayer, 2 - player vs ai
 
     @Override
     public void start(Stage stage) throws Exception {
@@ -31,15 +30,23 @@ public class GameWindow extends Application {
         stage.setResizable(false);
         stage.show();
 
-        if(!isMultiplayer){
-            GameController controller = loader.getController();
-            controller.evolveIntoAIGame();
+        GameController controller = loader.getController();
+        switch (gameType) {
+            case PLAYER_TO_PLAYER:
+                controller.startTwoPlayersGame();
+                break;
+            case PLAYER_TO_AI:
+                controller.startPlayerAIGame();
+                break;
+            case AI_TO_AI:
+                controller.startDoubleAIGame();
+                break;
         }
     }
 
 
-    public void setIsMultiplayer(boolean isMultiplayer) {
-        this.isMultiplayer = isMultiplayer;
+    public void setGameType(GameType gameType) {
+        this.gameType = gameType;
     }
 
     public void setStageToHide(Stage stageToHide) {

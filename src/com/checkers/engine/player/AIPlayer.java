@@ -34,6 +34,6 @@ public class AIPlayer extends Player{
         if(possibleMoves.isEmpty())
             return;
         Move chosenMove = movePickingStrategy.getMove(possibleMoves);
-        gameController.movePiece(chosenMove);
+        gameController.movePiece(chosenMove, false);
     }
 }

@@ -11,11 +11,9 @@ public class Game {
     public Player whitePlayer, blackPlayer;
     private Alliance turn;
 
-    public Game(Player whitePlayer, Player blackPlayer) {
-        this.whitePlayer = whitePlayer;
-        this.blackPlayer = blackPlayer;
+    public Game() {
         board = new Board();
-        turn = Alliance.WHITE;
+        turn = Alliance.BLACK;
     }
 
     Game(Game game) {
@@ -28,9 +26,9 @@ public class Game {
     }
 
     public void alternateTurn() {
+        turn = turn.getOpposite();
         Player activePlayer = getActivePlayer();
         activePlayer.performNextTurn(board);
-        turn = turn.getOpposite();
     }
 
     public Board getBoard() {
@@ -38,20 +36,15 @@ public class Game {
     }
 
     public boolean isEndOfGame() {
-        Tile[][] tiles = getBoard().getTiles();
-        for (Tile[] row : tiles) {
-            for (Tile tile : row) {
-                if (tile.isOccupied() && tile.getOccupant().getPieceAlliance() == turn) {
-                    if (!tile.getOccupant().checkForPossibleMoves(getBoard(), true).isEmpty())
-                        return false;
-                }
-            }
-        }
-        return true;
+        return
+                board.alliancePieces.get(Alliance.WHITE).isEmpty()
+                        || board.alliancePieces.get(Alliance.BLACK).isEmpty()
+                        || board.alliancePieces.values().stream()
+                        .allMatch(pieces -> pieces.stream().allMatch(piece -> piece.checkForPossibleMoves(board, true, false).isEmpty()));
     }
 
     public String getWinner() {
-        return (turn == Alliance.WHITE) ? "Black" : "White";
+        return (turn == Alliance.WHITE) ? "White" : "Black";
     }
 
     public Player getActivePlayer() {

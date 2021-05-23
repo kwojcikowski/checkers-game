@@ -5,14 +5,16 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
-<VBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="260" prefWidth="460" style="-fx-background-image: url('com/checkers/images/background.png');" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.checkers.windows.startingWindow.StartingWindowController">
+<VBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="260" prefWidth="660" style="-fx-background-image: url('com/checkers/images/background.png');" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.checkers.windows.startingWindow.StartingWindowController">
    <children>
       <Label fx:id="titlePt1" text="Please choose the type of game" />
       <Label fx:id="titlePt2" text="you would like to play: " />
       <Region prefHeight="200.0" prefWidth="200.0" />
       <Button onAction="#runMultiplayerGame" mnemonicParsing="false" text="Play multiplayer" />
       <Region prefHeight="200.0" prefWidth="200.0" />
-      <Button  onAction="#runAIGame" mnemonicParsing="false" text="Play vs AI" />
+      <Button onAction="#runAIGame" mnemonicParsing="false" text="Play vs AI" />
+      <Region prefHeight="200.0" prefWidth="200.0" />
+      <Button onAction="#runDoubleAIGame" mnemonicParsing="false" text="AI vs AI" />
       <Region prefHeight="200.0" prefWidth="200.0" />
    </children>
    <padding>
