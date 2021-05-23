@@ -21,34 +21,8 @@ public class Pawn extends Piece {
         direction = pieceAlliance==Alliance.WHITE? -1: 1;
     }
 
-    King promote() {
+    public King promote() {
         return King.promoteFrom(this);
-    }
-
-    public List<Move> getAllPossibleMoves(Board board) throws CloneNotSupportedException {
-        List<Move> possibleMoves = checkForPossibleMoves(board, true, false);
-
-        for (int i = 0; i < possibleMoves.size(); i++) {
-            Move m = possibleMoves.get(i);
-            if(m.isCapturing()){
-                CapturingMove lastMove = ((CapturingMove) m).getLastCapturingMove();
-                List<Move> furtherMoves = lastMove.piece.checkForPossibleMoves(lastMove.getBoardState(), false, false);
-
-                while(!furtherMoves.isEmpty()) {
-                    for(int j = 1; j < furtherMoves.size(); j++) {
-                        CapturingMove copiedMoveSequence = ((CapturingMove) m).copy();
-                        copiedMoveSequence.addLastMove((CapturingMove) furtherMoves.get(j));
-                        possibleMoves.add(copiedMoveSequence);
-                    }
-                    ((CapturingMove) m).addLastMove((CapturingMove) furtherMoves.get(0));
-
-                    lastMove = (CapturingMove) furtherMoves.get(0);
-                    furtherMoves = lastMove.piece.checkForPossibleMoves(lastMove.getBoardState(), false, false);
-                }
-            }
-        }
-
-        return possibleMoves;
     }
 
     @Override
@@ -66,7 +40,7 @@ public class Pawn extends Piece {
                     Piece movedPiece = alternativeTiles[occupiedTile.getCoords().x][occupiedTile.getCoords().y].getOccupant();
                     movedPiece.moveTo((BlackTile) alternativeTiles[x][y]);
                     moves.add(
-                            Move.to(movedPiece, Coords.at(x, y), true, alternativeBoard)
+                            Move.to(this.deepClone(), Coords.at(x, y), true, alternativeBoard)
                     );
                 }
             }
@@ -79,12 +53,11 @@ public class Pawn extends Piece {
                             && candidateTile.isFree()){
                         Board boardAfterMove = Board.copyOf(board);
                         Tile[][] tilesAfterMove = boardAfterMove.getTiles();
-                        Piece alternativePiece = tilesAfterMove[coords.x][coords.y]
-                                .getOccupant();
+                        Piece alternativePiece = tilesAfterMove[coords.x][coords.y].getOccupant();
                         alternativePiece.moveTo((BlackTile) tilesAfterMove[candidateTile.getCoords().x][candidateTile.getCoords().y]);
                         tilesAfterMove[tileToJumpOver.getCoords().x][tileToJumpOver.getCoords().y].freeUp();
 
-                        moves.add(CapturingMove.to(alternativePiece, candidateTile.getCoords(), isDirect, tileToJumpOver.getCoords(), null, boardAfterMove));
+                        moves.add(CapturingMove.to(this.deepClone(), candidateTile.getCoords(), isDirect, tileToJumpOver.getCoords(), null, boardAfterMove));
                         if(recursive) {
                             Board alternativeBoard = Board.copyOf(board);
                             Tile[][] alternativeTiles = alternativeBoard.getTiles();
@@ -103,8 +76,7 @@ public class Pawn extends Piece {
     }
 
     @Override
-    public Pawn clone() throws CloneNotSupportedException {
+    public Piece deepClone() {
         return new Pawn(pieceAlliance, occupiedTile);
     }
-
 }

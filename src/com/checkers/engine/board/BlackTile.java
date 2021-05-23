@@ -36,10 +36,10 @@ public class BlackTile extends Tile {
     }
 
     @Override
-    protected BlackTile clone() throws CloneNotSupportedException {
+    public BlackTile clone() {
         BlackTile alternativeTile = new BlackTile(Coords.at(this.coords.x, this.coords.y));
         if(this.isOccupied()){
-            var alternativePiece = occupant.clone();
+            var alternativePiece = occupant.deepClone();
             alternativeTile.setOccupant(alternativePiece);
             alternativePiece.setOccupiedTile(alternativeTile);
         }

@@ -60,7 +60,7 @@ public class CapturingMove extends Move {
         return nextMove;
     }
 
-    public CapturingMove copy() throws CloneNotSupportedException {
+    public CapturingMove copy() {
         CapturingMove rootCopy = unlinkedCopy();
         List<CapturingMove> links = new ArrayList<>();
         CapturingMove next = nextMove;
@@ -76,8 +76,8 @@ public class CapturingMove extends Move {
         return rootCopy;
     }
 
-    private CapturingMove unlinkedCopy() throws CloneNotSupportedException {
-        Piece clonePieced = piece.clone();
+    private CapturingMove unlinkedCopy() {
+        Piece clonePieced = piece.deepClone();
         Coords copiedDestCoords = Coords.at(destinationCoords.x, destinationCoords.y);
         Board copiedBoardState = Board.copyOf(getBoardState());
         Coords attackedPieceCoords = Coords.at(getAttackedPieceCoords().x, getAttackedPieceCoords().y);

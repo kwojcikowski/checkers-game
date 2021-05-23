@@ -15,14 +15,12 @@ public class GameWindow extends Application {
     private boolean isMultiplayer;
     private Stage stageToHide;
 
+    //int 1 - multiplayer, 2 - player vs ai
+
     @Override
     public void start(Stage stage) throws Exception {
         FXMLLoader loader = new FXMLLoader(getClass().getResource(FXML_PATH));
         Parent root = loader.load();
-        if(!isMultiplayer){
-            GameController controller = loader.getController();
-            controller.evolveIntoAIGame();
-        }
 
         Scene gameScene = new Scene(root, WIDTH, HEIGHT);
         gameScene.getStylesheets().add(getClass().getResource(STYLE_PATH).toExternalForm());
@@ -32,6 +30,11 @@ public class GameWindow extends Application {
         stage.setScene(gameScene);
         stage.setResizable(false);
         stage.show();
+
+        if(!isMultiplayer){
+            GameController controller = loader.getController();
+            controller.evolveIntoAIGame();
+        }
     }
 
 

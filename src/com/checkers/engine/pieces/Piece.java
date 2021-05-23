@@ -4,6 +4,7 @@ import com.checkers.engine.Alliance;
 import com.checkers.engine.board.BlackTile;
 import com.checkers.engine.board.Board;
 import com.checkers.engine.board.Coords;
+import com.checkers.engine.board.move.CapturingMove;
 import com.checkers.engine.board.move.Move;
 
 import java.util.List;
@@ -50,7 +51,33 @@ public abstract class Piece {
         //TODO cemetery?
     }
 
-    public abstract List<Move> getAllPossibleMoves(Board board) throws CloneNotSupportedException;
+    public List<Move> getAllPossibleMoves(Board board) {
+        List<Move> possibleMoves = checkForPossibleMoves(board, true, false);
+
+        for (int i = 0; i < possibleMoves.size(); i++) {
+            Move m = possibleMoves.get(i);
+            if(m.isCapturing()){
+                CapturingMove lastMove = ((CapturingMove) m).getLastCapturingMove();
+                Piece movingPiece = lastMove.getResultingPiece();
+                List<Move> furtherMoves = movingPiece.checkForPossibleMoves(lastMove.getBoardState(), false, false);
+
+                while(!furtherMoves.isEmpty()) {
+                    for(int j = 1; j < furtherMoves.size(); j++) {
+                        CapturingMove copiedMoveSequence = ((CapturingMove) m).copy();
+                        copiedMoveSequence.addLastMove((CapturingMove) furtherMoves.get(j));
+                        possibleMoves.add(copiedMoveSequence);
+                    }
+                    ((CapturingMove) m).addLastMove((CapturingMove) furtherMoves.get(0));
+
+                    lastMove = (CapturingMove) furtherMoves.get(0);
+                    movingPiece = lastMove.getResultingPiece();
+                    furtherMoves = movingPiece.checkForPossibleMoves(lastMove.getBoardState(), false, false);
+                }
+            }
+        }
+
+        return possibleMoves;
+    }
 
     public abstract List<Move> checkForPossibleMoves(Board board,
                                                      boolean isAvailableDirectly,
@@ -61,7 +88,6 @@ public abstract class Piece {
         return checkForPossibleMoves(board, isAvailableDirectly, true);
     }
 
-    @Override
-    public abstract Piece clone() throws CloneNotSupportedException;
+    public abstract Piece deepClone();
 
 }

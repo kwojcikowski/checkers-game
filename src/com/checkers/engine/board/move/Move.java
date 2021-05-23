@@ -37,4 +37,8 @@ public class Move {
     public Board getBoardState() {
         return boardState;
     }
+
+    public Piece getResultingPiece() {
+        return boardState.getTiles()[destinationCoords.x][destinationCoords.y].getOccupant();
+    }
 }

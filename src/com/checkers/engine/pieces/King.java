@@ -17,11 +17,6 @@ public class King extends Piece{
         super(alliance, occupiedTile);
     }
 
-    @Override
-    public List<Move> getAllPossibleMoves(Board board) throws CloneNotSupportedException {
-        return null;
-    }
-
     public static King promoteFrom(Pawn pawn) {
         var king = new King(pawn.getPieceAlliance(), pawn.getOccupiedTile());
         pawn.getOccupiedTile().setOccupant(king);
@@ -41,8 +36,16 @@ public class King extends Piece{
                 int y = coords.y + verticalShift;
                 try{
                     while(tiles[x][y].isFree()){
-//                        if (isAvailableDirectly)
-//                            moves.add(Move.to(Coords.at(x, y), true));
+                        if (isAvailableDirectly) {
+                            Board alternativeBoard = Board.copyOf(board);
+                            Tile[][] alternativeTiles = alternativeBoard.getTiles();
+                            Piece movedPiece = alternativeTiles[occupiedTile.getCoords().x][occupiedTile.getCoords().y].getOccupant();
+                            movedPiece.moveTo((BlackTile) alternativeTiles[x][y]);
+                            moves.add(
+                                    Move.to(this.deepClone(), Coords.at(x, y), true, alternativeBoard)
+                            );
+                        }
+
                         x += horizontalShift;
                         y += verticalShift;
                     }
@@ -51,9 +54,16 @@ public class King extends Piece{
                         x += horizontalShift;
                         y += verticalShift;
                         while(tiles[x][y].isFree()){
-//                            moves.add(
-//                                    CapturingMove.to(Coords.at(x, y),
-//                                            true, tileToJumpOver.getCoords()));
+                            BlackTile candidateTile = (BlackTile) tiles[x][y];
+                            Board boardAfterMove = Board.copyOf(board);
+                            Tile[][] tilesAfterMove = boardAfterMove.getTiles();
+                            Piece alternativePiece = tilesAfterMove[coords.x][coords.y].getOccupant();
+                            alternativePiece.moveTo((BlackTile) tilesAfterMove[candidateTile.getCoords().x][candidateTile.getCoords().y]);
+                            tilesAfterMove[tileToJumpOver.getCoords().x][tileToJumpOver.getCoords().y].freeUp();
+
+                            moves.add(
+                                    CapturingMove.to(this.deepClone(), Coords.at(x, y), false, tileToJumpOver.getCoords(), null, boardAfterMove)
+                            );
                             x += horizontalShift;
                             y += verticalShift;
                             //TODO recursive call
@@ -66,7 +76,7 @@ public class King extends Piece{
     }
 
     @Override
-    public King clone() throws CloneNotSupportedException {
+    public King deepClone() {
         return new King(pieceAlliance, occupiedTile);
     }
 
