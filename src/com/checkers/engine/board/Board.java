@@ -16,18 +16,21 @@ public class Board {
     final Tile[][] tiles;
 
     public Map<Alliance, Set<Piece>> alliancePieces = new HashMap<>();
-//    public Set<Piece> blackPieces, whitePieces;
 
     public Board(){
         tiles = new Tile[BOARD_SIZE][BOARD_SIZE];
         alliancePieces.put(Alliance.WHITE, new HashSet<>());
         alliancePieces.put(Alliance.BLACK, new HashSet<>());
         setupTiles();
-//        setupBoard();
+        setupBoard();
 
 
-        setupPawn(Alliance.WHITE, 6, 4);
-        setupKing(Alliance.BLACK, 5, 3);
+//        setupPawn(Alliance.WHITE, 2, 2);
+//        setupPawn(Alliance.BLACK, 1, 3);
+//        setupPawn(Alliance.BLACK, 2, 6);
+
+//        setupPawn(Alliance.WHITE, 6, 4);
+//        setupKing(Alliance.BLACK, 5, 3);
 //        setupPawn(Alliance.BLACK, 3, 1);
 //        setupPawn(Alliance.BLACK, 3, 3);
 //        setupPawn(Alliance.BLACK, 5, 3);
@@ -119,6 +122,16 @@ public class Board {
             throw new UnsupportedOperationException();
         }
         else return (BlackTile) tile;
+    }
+
+    public boolean isEligibleForPromotion(Piece piece) {
+        if(piece instanceof King)
+            return false;
+
+        if(piece.getPieceAlliance() == Alliance.WHITE)
+            return piece.getCoords().x == 0;
+        else
+            return piece.getCoords().x == BOARD_SIZE - 1;
     }
 
     //TODO clone? copy constructor?

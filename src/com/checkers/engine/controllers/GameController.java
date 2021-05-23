@@ -13,6 +13,7 @@ import com.checkers.engine.pieces.King;
 import com.checkers.engine.pieces.Pawn;
 import com.checkers.engine.pieces.Piece;
 import com.checkers.engine.player.AIPlayer;
+import com.checkers.engine.player.strategy.RandomFirstAttackStrategy;
 import com.checkers.engine.player.strategy.RandomStrategy;
 import javafx.animation.TranslateTransition;
 import javafx.fxml.FXML;
@@ -75,8 +76,8 @@ public class GameController {
 
     public void evolveIntoAIGame() {
         game = new AIGame(game, this);
-        game.whitePlayer = new AIPlayer(Alliance.WHITE, new RandomStrategy(), this);
-        game.blackPlayer = new AIPlayer(Alliance.BLACK, new RandomStrategy(), this);
+        game.whitePlayer = new AIPlayer(Alliance.WHITE, new RandomFirstAttackStrategy(), this);
+        game.blackPlayer = new AIPlayer(Alliance.BLACK, new RandomFirstAttackStrategy(), this);
 
         game.alternateTurn();
     }
@@ -344,9 +345,11 @@ public class GameController {
     }
 
     private void promote(Piece piece) {
-        board.alliancePieces.get(game.getTurn()).remove(piece);
+        if(piece instanceof King)
+            return;
+        board.alliancePieces.get(piece.getPieceAlliance()).remove(piece);
         King promoted = King.promoteFrom((Pawn) piece);
-        board.alliancePieces.get(game.getTurn()).add(promoted);
+        board.alliancePieces.get(piece.getPieceAlliance()).add(promoted);
 
 
         boardLayout[promoted.getCoords().x][promoted.getCoords().y].getChildren().clear();
@@ -388,4 +391,5 @@ public class GameController {
         messageContainer.getChildren().addAll(gameOverLabel, winner, playAgain);
         boardStackPane.getChildren().add(messageContainer);
     }
+
 }

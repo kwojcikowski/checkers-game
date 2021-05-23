@@ -59,6 +59,9 @@ public abstract class Piece {
             if(m.isCapturing()){
                 CapturingMove lastMove = ((CapturingMove) m).getLastCapturingMove();
                 Piece movingPiece = lastMove.getResultingPiece();
+
+                if(board.isEligibleForPromotion(movingPiece))
+                    movingPiece = ((Pawn) movingPiece).promote();
                 List<Move> furtherMoves = movingPiece.checkForPossibleMoves(lastMove.getBoardState(), false, false);
 
                 while(!furtherMoves.isEmpty()) {

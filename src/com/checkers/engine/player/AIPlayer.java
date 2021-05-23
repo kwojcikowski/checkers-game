@@ -31,7 +31,6 @@ public class AIPlayer extends Player{
                 .map(piece -> piece.getAllPossibleMoves(board))
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
-        System.out.println("possibleMoves = " + possibleMoves.size());
         if(possibleMoves.isEmpty())
             return;
         Move chosenMove = movePickingStrategy.getMove(possibleMoves);
